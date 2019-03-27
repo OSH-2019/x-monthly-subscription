@@ -1,6 +1,7 @@
 # Monthly Subscription Group
 
-Our project: Dataflow-driven network packet processing based on eBPF, aimed at low latency.
+Our project: Dataflow-driven network packet processing based on eBPF, aimed at low latency.  
+Our group members: Jiaxing Zhao (PB17111625) (Group leader); Keyu Tao (); Jiawei Fu (); Ang Chen (); Zhehao Li ().  
 
 ## Progress
 

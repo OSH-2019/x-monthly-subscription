@@ -20,7 +20,9 @@
 
 ### 一般的数据包处理模式
 
-在网卡接收到数据包后，网卡会通过 DMA 把数据包复制到内核内存中（如果没有 DMA，那么复制就要由 CPU 来做）。之后产生硬件中断，通知 CPU 数据复制完成，此时 CPU 运行网卡驱动程序的对应函数，清空这个中断，并且启动 NAPI (New API) 的函数。在此之后，网卡驱动与内核进行了一系列复杂的处理……
+在网卡接收到数据包后，网卡会通过 DMA 把数据包复制到内核空间内存中（如果没有 DMA，那么复制就要由 CPU 来做）。之后产生硬件中断，通知 CPU 数据复制完成，此时 CPU 运行网卡驱动程序的对应函数，清空这个中断，并且启动 NAPI (New API) 的函数。在此之后，网卡驱动与内核还需要进行了一系列复杂的处理。
+
+可以看到，这个过程中不可避免地会出现数据包的复制：从网卡到内核空间内存，如果需要的话，数据包还需要复制到用户层应用中；内核、驱动与网卡硬件的交互等，并且 CPU 也必须参与进网络包处理的过程中。
 
 ### cBPF 与 eBPF
 
@@ -41,6 +43,10 @@ BPF 于 1992 年末由 Steve McCane 和 Van Jacobson 在论文 *The BSD Packet F
 2. 并且，树模型通常进行不必要或多余的计算。 
 
 Benchmark 也表明，cBPF 比 CSPF 效率要好得多。
+
+![BPF Virtual CPU](files/research/BPF-VM.png)
+
+*图：BPF 虚拟处理器结构示意图*
 
 我们可以使用 Linux 上的 `tcpdump` 查看一些 cBPF 指令的例子。
 
@@ -78,6 +84,10 @@ $ sudo tcpdump -d tcp
 - 全局数据存储结构 Map：Map 是一种通用数据结构，以键值对的形式存储不同类型的数据。它们允许在 eBPF 内核程序之间以及内核和用户空间应用程序之间共享数据。
 - 辅助函数（Helper functions）：如数据包重写，校验和计算或数据包克隆。与用户空间编程不同，这些函数在内核中执行。此外，还可以从eBPF程序执行系统调用。
 - 尾调用（Tail-calls）：eBPF 程序大小限制为 4096 字节。尾调用功能允许 eBPF 程序通过控制新的 eBPF 程序来克服此限制。
+
+![eBPF Service Chains](files/research/eBPF-service-chains.png)
+
+*图：eBPF 程序的尾调用*
 
 由于 eBPF 的指令集变得更加复杂，单纯使用汇编的方式进行开发是比较难的。目前，eBPF 程序可以使用 C 语言书写，使用 `clang` 和 `llvm` 编译之后就可以得到 eBPF 代码。最终，内核中的 JIT 编译器将 eBPF 代码转为原生代码。
 
@@ -238,7 +248,7 @@ XDP 基于上文提到的 BPF，实现高速的包处理。
 
 我们计划使用 Agilio CX SmartNIC 2x10GbE 这款智能网卡来进行我们的实验。其基于 Netronome 的 SmartNIC，核心部件为 NFP (Network Flow Processor)，它是一个多线程多核的网络流处理器。
 
-![NPF-4000](files/research/NPF-4000.jpg)
+![NFP-4000](files/research/NPF-4000.jpg)
 
 *图：NFP-4000 网络流处理器的内部架构*
 

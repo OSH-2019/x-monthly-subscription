@@ -20,7 +20,7 @@
 
 ### 一般的数据包处理模式
 
-在网卡接收到数据包后，网卡会通过 DMA 把数据包复制到内核空间内存中（如果没有 DMA，那么复制就要由 CPU 来做）。之后产生硬件中断，通知 CPU 数据复制完成，此时 CPU 运行网卡驱动程序的对应函数，清空这个中断，并且启动 NAPI (New API) 的函数。在此之后，网卡驱动与内核还需要进行了一系列复杂的处理。
+在网卡接收到数据包后，网卡会通过 DMA (Direct Memory Access) 把数据包复制到内核空间内存中（如果没有 DMA，那么复制就要由 CPU 来做）。之后产生硬件中断，通知 CPU 数据复制完成，此时 CPU 运行网卡驱动程序的对应函数，清空这个中断，并且启动 NAPI (New API) 的函数。在此之后，网卡驱动与内核还需要进行了一系列复杂的处理。
 
 可以看到，这个过程中不可避免地会出现数据包的复制：从网卡到内核空间内存，如果需要的话，数据包还需要复制到用户层应用中；内核、驱动与网卡硬件的交互等，并且 CPU 也必须参与进网络包处理的过程中。
 
@@ -120,7 +120,7 @@ eBPF 的整体架构如下。
 
 首先介绍 DPDK，它实现了 kernel bypass，在用户空间处理所有的网络请求。由于绕过了内核，网卡也需要由用户空间的驱动来管理。
 
-将网卡的完全控制权交给用户空间程序的好处是，我们减少了内核所带来的障碍，比如上下文切换、网络层处理、中断等。这足以使网络数据传输达到 10Gbps 甚至更高。kernel bypass 与其他特性（如批量包处理）和性能调整方法（如 NUMA 感知，CPU 隔离等），整合出了高性能用户空间网络的基础结构。
+将网卡的完全控制权交给用户空间程序的好处是，我们减少了内核所带来的障碍，比如上下文切换、网络层处理、中断等。这足以使网络数据传输达到 10Gbps 甚至更高。Kernel bypass 与其他特性（如批量包处理）和性能调整方法（如 NUMA 感知，CPU 隔离等），整合出了高性能用户空间网络的基础结构。
 
 但 DPDK 基于的用户空间网络的不足则在于：
 
@@ -310,7 +310,7 @@ Jakub Kicinski 与 Nic Viljoen 以此架构概念性地将 eBPF 虚拟机映射�
 8. [Achieving a Cloud Scale Architecture with SmartNICs](https://www.mellanox.com/blog/2018/09/why-you-need-smart-nic-use-cases/)
 9. [Dataflow architecture](https://en.wikipedia.org/wiki/Dataflow_architecture)
 10. [Von Neumann architecture](https://en.wikipedia.org/wiki/Von_Neumann_architecture)
-11. [一种新的体系结构——数据流计算机](files/research/一种新的体系结构_数据流计算机_李国杰.pdf)
+11. [一种新的体系结构——数据流计算机](https://github.com/OSH-2019/x-monthly-subscription/blob/master/docs/files/research/%E4%B8%80%E7%A7%8D%E6%96%B0%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84_%E6%95%B0%E6%8D%AE%E6%B5%81%E8%AE%A1%E7%AE%97%E6%9C%BA_%E6%9D%8E%E5%9B%BD%E6%9D%B0.pdf)
 12. [Netronome NFP-4000 Flow Processor](https://www.netronome.com/media/documents/PB_NFP-4000.pdf)
 13. [Agilio® CX 2x10GbE SmartNIC](https://www.netronome.com/media/documents/PB_Agilio_CX_2x10GbE.pdf)
 14. [eBPF/XDP hardware offload to SmartNICs](https://netdevconf.org/1.2/session.html?jakub-kicinski)

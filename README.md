@@ -11,7 +11,7 @@ Our group members:
 
 ## Progress
 
-调研报告: WIP, before DDL (19/03/31)
+调研报告: [Markdown Version](docs/research.md) | [PDF Version](docs/research.pdf)
 
 ## Discussion
 

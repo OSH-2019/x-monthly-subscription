@@ -2,6 +2,8 @@
 
 **Monthly Subscription Group**
 
+[TOC]
+
 ## 小组成员
 
 - **赵家兴 (PB17111625) (组长)**
@@ -27,6 +29,18 @@
 #### cBPF
 
 BPF 于 1992 年末由 Steve McCane 和 Van Jacobson 在论文 *The BSD Packet Filter: A New Architecture for User-level Packet Capture* 中提出。在 14 年新的 BPF 架构被提出之后，之前的 BPF 被称为 cBPF ("classic BPF")。cBPF 的虚拟机非常精简，只有用于索引的寄存器（Index register）与累加器两个寄存器，指令也只有二十余条。
+
+在 cBPF 之前，也有与之类似思路的数据包过滤程序，如 CSPF (CMU/Stanford Packet Filter)。它也同样是内核级别的实现，也有虚拟机。其基于操作数堆栈，采用树形表达式方法。指令要么在栈上推送常量或包数据，或者在顶部执行二进制布尔运算或按位运算两个要素。过滤程序是顺序执行的列表指示。评估一个程序后，如果顶部堆栈具有非零值或堆栈为空，然后数据包为接受，否则被拒绝。
+
+但 CSPF 的方法有两个实现缺点：
+
+1. 必须模拟操作数堆栈。在古老的 PDP-11 机器上，这种思路可以运行得很好，但是在现代机器上，这意味着使用加法和减法运算维护一个模拟出的堆栈指针，并对内存进行加载和存储以模拟堆栈。由于内存是冯·诺伊曼架构的主要瓶颈，因此这样做带来了性能上的限制。
+
+   而由于 BPF 使用一种重新设计的基于寄存器的“过滤器虚拟机”，而不是基于内存，能够在基于寄存器的 RISC 处理器上高效率地实现。
+
+2. 并且，树模型通常进行不必要或多余的计算。 
+
+Benchmark 也表明，cBPF 比 CSPF 效率要好得多。
 
 我们可以使用 Linux 上的 `tcpdump` 查看一些 cBPF 指令的例子。
 
@@ -222,7 +236,7 @@ XDP 基于上文提到的 BPF，实现高速的包处理。
 
 ### Agilio CX SmartNIC 智能网卡
 
-我们计划使用 Agilio CX SmartNIC 2x10GbE 这款智能网卡来进行我们的实验。其核心部件为 NFP (Network Flow Processor)，它是一个多线程多核的网络流处理器。
+我们计划使用 Agilio CX SmartNIC 2x10GbE 这款智能网卡来进行我们的实验。其基于 Netronome 的 SmartNIC，核心部件为 NFP (Network Flow Processor)，它是一个多线程多核的网络流处理器。
 
 ![NPF-4000](files/research/NPF-4000.jpg)
 
@@ -238,7 +252,31 @@ XDP 基于上文提到的 BPF，实现高速的包处理。
 
 ## 相关工作
 
-Hardware offload……
+上文提到的硬件卸载（Hardware offload）将一部分处理工作交给硬件实现以提高速度。
+
+在 2016 年，东京 NetDev 1.2 大会上，Jakub Kicinski 与 Nic Viljoen 提出了将 eBPF/XDP 程序硬件卸载到 Netronome 的数据流处理器智能网卡上的架构方法。
+
+在以 NPU 为基础的 SmartNIC 出现之前，由于传统 NIC 缺乏广泛的硬件卸载适配性，并且传统 x86 通用 CPU 已经能较好地实现硬件卸载，同时实现通用卸载要适配多种不同特定硬件架构的复杂性，少有成功的 eBPF 向 NIC 的硬件卸载。而随着通用 CPU 难以胜任目前的网络负载规模，并且 RISC 工作者在以 NPU 为基础的 SmartNIC 上的工作日趋成熟，向 SmartNIC 上硬件卸载 eBPF 程序正当其时。
+
+![NFP-6xxx](files/research/NFP-6xxx.jpg)
+
+*图：NFP 6xxx 芯片架构*
+
+上图展示的是该二人使用的 NFP 6xxx 芯片的架构。NFP 结构中包含一系列的硬件单元，这些单元均是为了实现某种特定的功能（如加密，重排序等）。它们与一些完全可编程的微引擎结合，嵌入到了每个含 12 个微引擎的计算岛屿上（芯片中含微引擎总数在 72 到 120 之间），这些岛屿上还包括 SRAM 集群目标内存（CTM，256KB）和集群本地暂存（CLS，64KB）。NIC 上还包括一个 2~8 GB 的 DRAM 存储 EMEM 和 8 MB 的 SRAM 存储 IMEM。
+
+在每个微引擎（Microengine）上，可以同时运行 4 到 8 个与浅管道协同复用的线程，这确保了时钟周期可以高效利用。无锁交换内存架构使得 NIC 的内存并不像其他架构的内存一样容易成为性能瓶颈。每个微引擎中有 256 个 32 位通用寄存器，分为 A 和 B 两组，它们被每个线程均分（在 8 上下文模式运行时，每个线程有 16 个 A 和 16 个 B 寄存器）。特别地，A 和 B 组中的寄存器仅能和另一个组的寄存器进行交互。每个微引擎中还有 256 个 32 位传输寄存器（128 读/写），4 KB 的本地 SRAM，以及 128 个 32 位下一相邻寄存器（next neighbour registers）。
+
+Jakub Kicinski 与 Nic Viljoen 以此架构概念性地将 eBPF 虚拟机映射到了 NFP 上。
+
+![Illustration of the conceptual mapping of the eBPF](files/research/conceptual-mapping-of-the-eBPF.jpg)
+
+*图：eBPF 虚拟机到 NFP 的映射*
+
+通过将 eBPF 的数据结构 maps 放在 DRAM 中，同时使用一定的缓存机制和多线程机制来提高速度，可以降低延迟。
+
+栈可以放在微引擎 SRAM 和计算岛屿 SRAM 的集合上，这一般要取决于栈的大小。NFP 指令存储区可以存储达 8000 条 NFP 汇编指令，当然多个微引擎可以结合起来，将可存储指令的数目扩大。
+
+最后，A、B 组通用寄存器，下一相邻寄存器，传输寄存器可以用来实现 eBPF 的 10 个 64 位寄存器。在 4 上下文运行模式下，每个线程分配的寄存器足以简单地满足这一映射；但在 8 线程下，需要一些管理与优化措施。
 
 ## 参考文献
 

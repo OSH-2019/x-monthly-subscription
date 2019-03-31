@@ -205,6 +205,16 @@ XDP 基于上文提到的 BPF，实现高速的包处理。
 
 区别于传统的冯诺依曼结构计算机或控制流计算机，数据流计算机 (Dataflow Architecture Computer) 是一种数据驱动方式系统结构的计算机，它在原理上不存在 PC 寄存器，只有当一条或一组指令所需的操作数全部准备好时，才能激发相应指令的一次执行，执行结果又流向等待这一数据的下一条或一组指令，以驱动该条或该组指令的执行。因此，程序中各条指令的执行顺序仅仅是由指令间的数据依赖关系决定的。虽然这种结构没有成功的应用在通用计算机上，但很多专用硬件使用这种结构获得了成功，这其中就包括网络路由、图像处理、数字信号处理等领域。
 
+#### 数据流语言
+
+数据流语言是一种用有向偶图表示的机器语言，是数据流计算机的基础，通过编码成为机器指令存在于计算机中。
+
+数据流语言有两种不同的节点：链（Link）和动作（Actor），一个动作表示进行一步运算，其结果由链传送到下一个动作。
+
+![Example of Dataflow Language](files/research/快速傅里叶变换.png)
+
+*图：数据流语言图示例*
+
 #### 优势
 
 数据流计算机在许多方面的性能优于传统的冯·诺依曼型计算机，包括：
@@ -294,3 +304,13 @@ Jakub Kicinski 与 Nic Viljoen 以此架构概念性地将 eBPF 虚拟机映射�
 2. [Monitoring and Tuning the Linux Networking Stack: Receiving Data](https://blog.packagecloud.io/eng/2016/06/22/monitoring-tuning-linux-networking-stack-receiving-data/)
 3. [The BSD Packet Filter: A New Architecture for User-level Packet Capture](http://www.tcpdump.org/papers/bpf-usenix93.pdf)
 4. [eBPF 简史](https://www.ibm.com/developerworks/cn/linux/l-lo-eBPF-history/index.html)
+5. [A brief introduction to XDP and eBPF](https://blogs.igalia.com/dpino/2019/01/07/introduction-to-xdp-and-ebpf/)
+6. [Toward Flexible and Efficient In-Kernel Network Function Chaining with IOVisor](http://hpsr2018.ieee-hpsr.org/files/2018/06/18-06-18-IOVisor-HPSR.pdf)
+7. [XDP eXpress Data Path](https://www.iovisor.org/technology/xdp)
+8. [Achieving a Cloud Scale Architecture with SmartNICs](https://www.mellanox.com/blog/2018/09/why-you-need-smart-nic-use-cases/)
+9. [Dataflow architecture](https://en.wikipedia.org/wiki/Dataflow_architecture)
+10. [Von Neumann architecture](https://en.wikipedia.org/wiki/Von_Neumann_architecture)
+11. [一种新的体系结构——数据流计算机](files/research/一种新的体系结构_数据流计算机_李国杰.pdf)
+12. [Netronome NFP-4000 Flow Processor](https://www.netronome.com/media/documents/PB_NFP-4000.pdf)
+13. [Agilio® CX 2x10GbE SmartNIC](https://www.netronome.com/media/documents/PB_Agilio_CX_2x10GbE.pdf)
+14. [eBPF/XDP hardware offload to SmartNICs](https://netdevconf.org/1.2/session.html?jakub-kicinski)

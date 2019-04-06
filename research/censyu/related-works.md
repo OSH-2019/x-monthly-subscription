@@ -123,12 +123,11 @@ see more in [P4, eBPF and Linux TC offload](https://open-nfp.org/the-classroom/p
 [^2]:	[数据流计算机 - 百度百科](https://baike.baidu.com/item/%E6%95%B0%E6%8D%AE%E6%B5%81%E8%AE%A1%E7%AE%97%E6%9C%BA#6)
 [^3]:	[Why You Need a SmartNIC and Smart NIC Use Cases](http://www.mellanox.com/blog/2018/09/why-you-need-smart-nic-use-cases/)   
 
-[^4]:	[Agilio CX SmartNIC 2x10GbE](https://www.netronome.com/products/agilio-cx/)  
+[^4]:	[Agilio CX SmartNIC 2x10GbE](https://www.netronome.com/products/agilio-cx/)
+[^5]:[Netronome NFP-4000 Flow Processor](https://www.netronome.com/media/documents/PB_NFP-4000.pdf)  
 
-[^5]:[Netronome NFP-4000 Flow Processor](https://www.netronome.com/media/documents/PB_NFP-4000.pdf)
-[^6]:	[Dive into BPF: a list of reading material](https://qmonnet.github.io/whirl-offload/2016/09/01/dive-into-bpf)  
-
-[^7]:	[A brief introduction to XDP and eBPF](https://blogs.igalia.com/dpino/2019/01/07/introduction-to-xdp-and-ebpf/)
+[^6]:	[Dive into BPF: a list of reading material](https://qmonnet.github.io/whirl-offload/2016/09/01/dive-into-bpf)
+[^7]:	[A brief introduction to XDP and eBPF](https://blogs.igalia.com/dpino/2019/01/07/introduction-to-xdp-and-ebpf/)  
 
 ex. [What Makes a NIC a SmartNIC, and Why is it Needed?](https://www.netronome.com/blog/what-makes-a-nic-a-smartnic-and-why-is-it-needed/)
 

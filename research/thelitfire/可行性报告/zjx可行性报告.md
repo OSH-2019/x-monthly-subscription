@@ -57,7 +57,7 @@ eBPF 程序的特性，支持它可以和内核的诸多架构配合，在网络
 本小组课题的基本思路是：不依赖或尽可能少地依赖操作系统内核与传统冯诺依曼架构上的硬件，在 Agilio SmartNIC 上独立处理网络包和网络数据；利用数据流架构的高效和高度并发来获得更快速、更低延迟的网络包处理。使用 C 语言编写实现各种网络处理功能的 eBPF 程序并最终编译成 SmartNIC 指令，同时根据不同的网络处理需求，优化指令序列，并最终利用 Netronome 产品开发的 eBPF 各个硬件卸载工具，编程到智能网卡上。项目目标是：获得尽可能高的数据包处理速度，获得纳秒级的处理延迟与“终端到终端”响应时间。
 
 我们现阶段确定的，计划使用的各项工具有：
-- 网卡型号：Agilio CX 2x10GbE ，https://www.netronome.com/products/agilio-cx/
-- 配套软件：Agilio eBPF Software ，https://www.netronome.com/products/agilio-software/agilio-ebpf-software/
+- 网卡型号：[Agilio CX 2x10GbE](https://www.netronome.com/products/agilio-cx/)
+- 配套软件：[Agilio eBPF Software](https://www.netronome.com/products/agilio-software/agilio-ebpf-software/) 等。
 - 服务器：具体型号未定。
 - 配套操作系统：Linux，版本未定。

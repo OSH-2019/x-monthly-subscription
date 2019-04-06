@@ -6,7 +6,7 @@
 
 详细介绍见[链接 1][1]
 
-一个数据包从外面网络进入网卡，要经过多次复制、转换和处理。数据包从网卡通过 [DMA](https://en.wikipedia.org/wiki/Direct_memory_access) (Direct Memory Access) 将数据包写入内存中预先分配好的地址（这是一种低级复制）。数据包写入完毕后网卡产生一个硬件中断，处理过程中禁用硬件中断（网卡可以持续 DMA 写入更多数据包而不产生 IRQ，后面一并处理），再产生软件中断（为了避免硬件中断长期占用 CPU）。
+一个数据包从外部网络进入网卡，要经过多次复制、转换和处理。数据包从网卡通过 [DMA](https://en.wikipedia.org/wiki/Direct_memory_access) (Direct Memory Access) 将数据包写入内存中预先分配好的地址（这是一种低级复制）。数据包写入完毕后网卡产生一个硬件中断，处理过程中禁用硬件中断（网卡可以持续 DMA 写入更多数据包而不产生 IRQ，后面一并处理），再产生软件中断（为了避免硬件中断长期占用 CPU）。
 
 ```text
                    +-----+
@@ -33,7 +33,7 @@
                                                    ↓
 ```
 
-软中断处理模块 `ksoftirq` 调用网卡驱动提供的函数一个一个 (poll) 将写好的数据包 (raw) 转换成内核网络模块能识别的 skb (**s**oc**k**et **b**uffer) 格式（复制 + 转码，具体实现由网卡驱动提供）。在 skb 格式下，内核首先进行 [GRO](https://lwn.net/Articles/358910/) (Generic Receive Offload)（这里可以是硬件也可以是 CPU）。由于历史遗留原因，目前单个 “硬件数据包” 大小，也就是 MTU (Maximum Transfer Unit) 通常为 1500 字节，所以经常需要 GRO 将多个 “物理数据包” 合并为一个 “逻辑数据包”。接下来的 [RSS](https://docs.microsoft.com/en-us/windows-hardware/drivers/network/introduction-to-receive-side-scaling) 和 [RPS](https://github.com/torvalds/linux/blob/v3.13/Documentation/networking/scaling.txt#L99-L222) 将逻辑数据包的处理任务分配给 CPU（调度）。这里如果有 [`AF_PACKET` 类型的套接字](http://man7.org/linux/man-pages/man7/packet.7.html)侦听该网卡，还要将数据包再复制一份给对应的套接字（`tcpdump` 抓包位置）。最后，数据包交给协议栈部分（IP 等）处理。全部数据包处理完之后重新启用硬件中断，以后收到更多数据包时可以继续产生硬 IRQ。
+软中断处理模块 `ksoftirq` 调用网卡驱动提供的函数，一个一个 (poll) 将写好的数据包 (raw) 转换成内核网络模块能识别的 skb (**s**oc**k**et **b**uffer) 格式（复制 + 转码，具体实现由网卡驱动提供）。在 skb 格式下，内核首先进行 [GRO](https://lwn.net/Articles/358910/) (Generic Receive Offload)（这里可以是硬件也可以是 CPU）。由于历史遗留原因，目前单个 “硬件数据包” 大小，也就是 MTU (Maximum Transfer Unit) 通常为 1500 字节，所以经常需要 GRO 将多个 “物理数据包” 合并为一个 “逻辑数据包”。接下来的 [RSS](https://docs.microsoft.com/en-us/windows-hardware/drivers/network/introduction-to-receive-side-scaling) 和 [RPS](https://github.com/torvalds/linux/blob/v3.13/Documentation/networking/scaling.txt#L99-L222) 将逻辑数据包的处理任务分配给 CPU（调度）。这里如果有 [`AF_PACKET` 类型的套接字](http://man7.org/linux/man-pages/man7/packet.7.html)（socket）侦听该网卡，还要将数据包再复制一份给对应的套接字（`tcpdump` 抓包位置）。最后，数据包交给协议栈部分（IP 等）处理。全部数据包处理完之后重新启用硬件中断，以后收到更多数据包时可以继续产生硬 IRQ。
 
 ```text
                                                      +-----+
@@ -74,8 +74,8 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 #### 主要延迟来源
 
 - DMA 复制和 CPU IRQ（处理中断需要进行上下文切换）
-- 原始数据 → skb
-- GRO
+- 原始数据 → skb 的转化过程
+- GRO (Generic Receive Offload)
 - 针对 `AF_PACKET` 套接字的复制
 
 ### Linux 的数据包发送过程
@@ -86,7 +86,7 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 
 #### 主要延迟来源
 
-与接收部分相似，延迟的主要来源以复制和处理数据包为主：
+与接收部分相似，发送延迟的主要来源以复制和处理数据包为主：
 
 - 数据包复制到 TAP
 - 硬件发送前对 skb 的处理（网卡驱动）

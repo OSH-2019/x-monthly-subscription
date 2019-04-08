@@ -130,6 +130,18 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 
 最后，整个架构通过高性能分布式交换结构（Distributed Switching Fabric）连接，该结构在设备中的所有组件之间提供高带宽的网络状连接使得各部件间能有效协作。
 
+SmartNIC 为网络处理设计的结构给网络相关领域带来了大量的性能提升。例如，其显著地提高了 OVS (Open vSwitch - 开放虚拟交换) 的效率。
+
+![ovs](files/feasibility/ovs.jpg)
+
+*图：SmartNIC 在 OVS 中的使用*
+
+同样，通过利用 SmartNIC，爱立信云 SDN（SDN 是一种网络虚拟化解决方案，可为基于虚拟，物理和容器的工作负载提供无缝的内部和数据中心间连接）在服务器吞吐量提升的同时也减小了成本。
+
+![cloud-sdn](files/feasibility/cloud-sdn.jpg)
+
+*图：SmartNIC 在 SDN 中的使用*
+
 ## 技术依据
 
 ### 硬件卸载简介

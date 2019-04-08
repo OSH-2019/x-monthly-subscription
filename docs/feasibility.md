@@ -112,10 +112,6 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 
 数据流的思想来源于这样一个概念：数据的价值随着时间的流逝而降低，所以事件出现后必须尽快地对它们进行处理，最好数据出现时便立刻对其进行处理，发生一个事件进行一次处理，而不是缓存起来成一批处理。在数据流模型中， 实现操作取决于数据的内部依赖性和资源的可利用性，它没有程序计数器，不会按照地址去寻找指令来执行，而是当一个操作需要的数据全部准备好后开始执行（称为点火 ，firing），并且输出的结果可以作为其他操作执行的前提条件。这样数据流计算模型中没有冯式结构中指令连续性的约束，可以更方便的使指令并行。另一方面，数据流计算模型中没有传统的变量这一概念，它仅处理数据值，忽略存放数据的容器（硬件层面是地址、软件层面指变量名）。基于这些特性，数据流结构计算模型拥有高实时性、低延迟的优点。
 
-目前，此结构的智能网卡已经被应用到多个领域，包括数据中心的分布式内存、网络虚拟化，网络包处理等。
-
-![data-center-workloads](files/feasibility/data-center-workloads.jpg)
-
 ### SmartNIC 的结构
 
 我们使用的智能网卡中的核心部分是型号为 NFP-4000 的网络流处理器，有别于为一些通用服务器提供的高性能处理，它可以用来提供高速的网络包处理。其拥有高度并行处理能力，并且有纳秒级的上下文切换速度。
@@ -130,7 +126,11 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 
 最后，整个架构通过高性能分布式交换结构（Distributed Switching Fabric）连接，该结构在设备中的所有组件之间提供高带宽的网络状连接使得各部件间能有效协作。
 
-SmartNIC 为网络处理设计的结构给网络相关领域带来了大量的性能提升。例如，其显著地提高了 OVS (Open vSwitch - 开放虚拟交换) 的效率。
+#### SmartNIC 数据流网卡的性能表现
+
+SmartNIC 为网络处理设计的结构给网络相关领域带来了大量的性能提升。目前，此结构的智能网卡已经被应用到多个领域，包括数据中心的分布式内存、网络虚拟化，网络包处理等。
+
+![data-center-workloads](/Users/tao/Documents/USTC_HW/OSH-X/x-monthly-subscription/docs/files/feasibility/data-center-workloads.jpg)例如，其显著地提高了 OVS (Open vSwitch - 开放虚拟交换) 的效率。
 
 ![ovs](files/feasibility/ovs.jpg)
 
@@ -283,4 +283,17 @@ SmartNIC 当然也对 helpers 提供了必要的支持，并且提供了特定�
 
 ## 参考文献
 
-1. ...
+1. [Linux网络 - 数据包的接收过程](https://segmentfault.com/a/1190000008836467)
+2. [Linux网络 - 数据包的发送过程](https://segmentfault.com/a/1190000008926093)
+3. [Von Neumann architecture - Design limitations](https://en.wikipedia.org/wiki/Von_Neumann_architecture#Design_limitations)
+4. [NFP-4000 Theory of Operation](https://www.netronome.com/media/redactor_files/WP_NFP4000_TOO.pdf)
+5. [Increase Application Performance with SmartNICs](https://www.openstack.org/assets/presentation-media/Netronome-OpenStack-Summit-Marketplace-presentation.pdf)
+6. [BPF, eBPF, XDP and Bpfilter… What are These Things and What do They Mean for the Enterprise?](https://www.netronome.com/blog/bpf-ebpf-xdp-and-bpfilter-what-are-these-things-and-what-do-they-mean-enterprise/)
+7. [Open Source Packet Filtering: eBPF at FOSDEM’19](https://www.netronome.com/blog/open-source-packet-filtering-bpf-fosdem19/)
+8. [Network hardware offload](https://blogs.cisco.com/performance/network_hardware_offload)
+9. [FRnOG 30: Faster Networking à la française](https://www.netronome.com/blog/frnog-30-faster-networking-la-francaise/)
+10. [Ever Deeper with BPF – An Update on Hardware Offload Support](https://www.netronome.com/blog/frnog-30-faster-networking-la-francaise/ )
+11. [eBPF maps](https://prototype-kernel.readthedocs.io/en/latest/bpf/ebpf_maps.html)
+12. [BPF Hardware Offload Deep Dive](https://www.netronome.com/media/documents/BPF_HW_offload_deep_dive.pdf)
+13. [BPF-HELPERS](https://github.com/iovisor/bpf-docs/blob/master/bpf_helpers.rst)
+14. [Demystify eBPF JIT Compiler](https://www.netronome.com/media/documents/demystify-ebpf-jit-compiler.pdf)

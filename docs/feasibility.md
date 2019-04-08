@@ -124,15 +124,21 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 
 最后，整个架构通过高性能分布式交换结构（Distributed Switching Fabric）连接，该结构在设备中的所有组件之间提供高带宽的网络状连接使得各部件间能有效协作。
 
-#### SmartNIC 数据流网卡的性能表现
+#### SmartNIC 数据流网卡的性能表现示例
 
 SmartNIC 为网络处理设计的结构给网络相关领域带来了大量的性能提升。目前，此结构的智能网卡已经被应用到多个领域，包括数据中心的分布式内存、网络虚拟化，网络包处理等。
 
-![data-center-workloads](files/feasibility/data-center-workloads.jpg)例如，其显著地提高了 OVS (Open vSwitch - 开放虚拟交换) 的效率。
+![data-center-workloads](files/feasibility/data-center-workloads.jpg)
+
+##### Open vSwitch
+
+SmartNIC 显著地提高了 OVS (Open vSwitch - 开放虚拟交换) 的效率。通过使用 SmartNIC，OVS 得到了相较于内核层 OVS 50 倍、用户层 OVS 20 倍的性能提升。
 
 ![ovs](files/feasibility/ovs.jpg)
 
 *图：SmartNIC 在 OVS 中的使用*
+
+##### SDN
 
 同样，通过利用 SmartNIC，爱立信云 SDN（SDN 是一种网络虚拟化解决方案，可为基于虚拟，物理和容器的工作负载提供无缝的内部和数据中心间连接）在服务器吞吐量提升的同时也减小了成本。
 

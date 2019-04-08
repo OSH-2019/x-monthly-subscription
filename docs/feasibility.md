@@ -128,7 +128,7 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 
 SmartNIC 为网络处理设计的结构给网络相关领域带来了大量的性能提升。目前，此结构的智能网卡已经被应用到多个领域，包括数据中心的分布式内存、网络虚拟化，网络包处理等。
 
-![data-center-workloads](/Users/tao/Documents/USTC_HW/OSH-X/x-monthly-subscription/docs/files/feasibility/data-center-workloads.jpg)例如，其显著地提高了 OVS (Open vSwitch - 开放虚拟交换) 的效率。
+![data-center-workloads](files/feasibility/data-center-workloads.jpg)例如，其显著地提高了 OVS (Open vSwitch - 开放虚拟交换) 的效率。
 
 ![ovs](files/feasibility/ovs.jpg)
 
@@ -249,17 +249,23 @@ SmartNIC 当然也对 helpers 提供了必要的支持，并且提供了特定�
 
 可以看到，层次越低，包处理的速度越快，而以硬件卸载方式的速度十分超群（单线运算速率是 XDP 的近四倍）。
 
+##### bpfilter
+
 另一 eBPF 硬件卸载的发展结果是 bpfilter——同时兼顾加入 eBPF 的新特性与兼容固有防火墙与 ip 协议的高性能网络过滤内核模块。下图是将 bpfilter 硬件卸载到 SmartNIC 上，与使用八核处理器，使用旧有的传统 iptables 和较新的 nftables，其数据处理速度进行的对比。
 
 ![img](files/feasibility/bpfilter-offload.png)
 
 *图：bpfilter 性能对比*
 
+##### Load Balancer
+
 基于数据流处理器的网络处理硬件卸载的高效还源自于，它规避了传统架构（如 x86）在 PCIe 带宽限制上不可避免的障碍。下图是使用 XDP 执行负载均衡时，使用 Agilio SmartNIC 硬件卸载与网卡驱动层 XDP，及使用 Intel Xeon CPU E5-2630 的性能对比，前者的数据包处理表现近乎是后者单核的 12 倍。
 
 ![img](files/feasibility/Load-Balancer-Performance.png)
 
 *图：XDP 在不同层处性能对比*
+
+##### XDP Latency
 
 同时，低延迟性也是选择硬件卸载 eBPF 的关键理由。由于 eBPF 程序直接在网卡上运行，数据包不必在跨越 PCIe 带宽造成的障碍，进而达到改善负载平衡和维护 DDoS 网络安全。下图展示了 XDP 在硬件卸载和网卡驱动层两个方式下的延迟对比，特别的，硬件卸载的延迟十分稳定。
 

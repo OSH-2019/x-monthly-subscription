@@ -10,7 +10,7 @@
 
 我们的项目是：对计算机在网络包处理上进行非冯化改造，绕过 CPU 与操作系统内核，直接在网卡上对网络包进行数据流驱动的实时处理。目标是纳秒级的延迟。
 
-### 项目背景
+### 传统的包处理过程及其延迟来源
 
 首先，我们需要看一下传统情况下 Linux 处理网络包时延迟是如何产生的。
 
@@ -118,9 +118,11 @@ IP 层对数据包进行几个基本的检查，例如确认目标 MAC 和本机
 
 ### SmartNIC 的结构
 
-我们使用的智能网卡中的核心部分是型号为 NPF-4000 的网络流处理器，有别于为一些通用服务器提供的高性能处理，它可以用来提供高速的网络包处理。其拥有高度并行处理能力，并且有纳秒级的上下文切换速度，下图是这款网络流处理器的微结构示意图：
+我们使用的智能网卡中的核心部分是型号为 NFP-4000 的网络流处理器，有别于为一些通用服务器提供的高性能处理，它可以用来提供高速的网络包处理。其拥有高度并行处理能力，并且有纳秒级的上下文切换速度。
 
 ![NPF4000-microarch](files/feasibility/NPF4000-microarch.jpg)
+
+*图：NFP-4000 微结构示意图*
 
 如上图所示，NFP-4000 有 60 个流处理核心，他们被分组成多个集群，并且分布在多个岛（Island）上，这些核心都是 32 位的定制核，并且每一个核能同时支持八个线程，使得这款处理器最多可以同时处理 480 个数据包。此外，每个流处理核心都连接了大量通用寄存器，并拥有访问专用指令和数据内存的权限，这使得他们可用来减少一些典型的输入输出指令、访问内存指令的延迟。高度并行的特点使得多个线程可以同时运行，从而减少内存延迟的影响。
 
@@ -150,6 +152,8 @@ eBPF 程序的特性，支持它可以和内核的诸多架构配合，在网络
 
 ![eBPF hooks on kernel frameworks](files/feasibility/eBPF-hooks.png)
 
+*图：eBPF 程序可以嵌入的内核架构*
+
 #### SmartNIC 上 eBPF 硬件卸载流程
 
 简单地说，eBPF 的硬件卸载需要以下这些流程：
@@ -162,6 +166,8 @@ eBPF 程序的特性，支持它可以和内核的诸多架构配合，在网络
 
 ![quentinblog.width-800](files/feasibility/quentinblog.width-800.png)
 
+*图：eBPF 硬件卸载到 SmartNIC 示意图*
+
 下面详细介绍 SmartNIC 对各个环节的支持。
 
 ##### 编程、调试工具链
@@ -172,11 +178,15 @@ Netronome 提供了 `bpftool`，这是一个重要的调试 eBPF 程序、监视
 
 ![1554551197196](files/feasibility/1554551197196.png)
 
+*图：C 语言对 SmartNIC 编程示意图*
+
 如图，我们可以使用 Network Flow C Compiler，这是是一个经过优化的、适配数据流架构的 C 编译器，并为 C 语言提供了一些扩展语法（extensions）。
 
 使用 SDK（Software Development Kit）IDE 的完整开发流程如下。
 
 ![1554206947241](files/feasibility/1554206947241.png)
+
+*图：使用 SDK 的开发流程示意图*
 
 ##### Maps 卸载
 
@@ -186,9 +196,9 @@ Maps 就是一个键值对，它的数据结构是任意的。常用的两种是
 
 Maps 只能由用户空间中的程序通过 eBPF 系统调用来创建，一个用户程序能够创造多个 maps，并通过文件描述符去访问它们的内容。用户程序与 eBPF 程序都能够更改储存在 maps 中的内容，而且不同的 eBPF 程序能够并行访问同一个 maps。
 
-------
-
 ![img](files/feasibility/1554513872147.png)
+
+*图：eBPF 程序与 maps 卸载到 SmartNIC 示意图* 
 
 为了保持 eBPF 在卸载之后仍能有优秀的实时处理性能，maps 可以同样卸载到 SmartNIC 上。并且 maps 在卸载之后仍然可以被主机上的程序访问，SmartNIC 对 eBPF maps offload 的支持体现在以下几点：
 
@@ -199,9 +209,9 @@ Maps 只能由用户空间中的程序通过 eBPF 系统调用来创建，一个
 
 目前 SmartNIC 已经支持最常用的数组 maps 和哈希 maps。
 
-下图：Map Offload
+![img](files/feasibility/1554549827061.png)
 
-![img](files/feasibility/1554549827061.png?lastModify=1554723677)
+*图：Map offload 流程图*
 
 ##### BPF Helper Function
 
@@ -225,19 +235,27 @@ SmartNIC 当然也对 helpers 提供了必要的支持，并且提供了特定�
 
 ![](files/feasibility/High-performance-networking-hooks.png)
 
-可以看到，层次越低，包处理的速度越快，而以硬件卸载方式的速度十分超群（单线运算速率是 XDP 的进四倍）。
+*图：eBPF 高速网络处理架构在不同位置的性能比较*
+
+可以看到，层次越低，包处理的速度越快，而以硬件卸载方式的速度十分超群（单线运算速率是 XDP 的近四倍）。
 
 另一 eBPF 硬件卸载的发展结果是 bpfilter——同时兼顾加入 eBPF 的新特性与兼容固有防火墙与 ip 协议的高性能网络过滤内核模块。下图是将 bpfilter 硬件卸载到 SmartNIC 上，与使用八核处理器，使用旧有的传统 iptables 和较新的 nftables，其数据处理速度进行的对比。
 
 ![img](files/feasibility/bpfilter-offload.png)
 
+*图：bpfilter 性能对比*
+
 基于数据流处理器的网络处理硬件卸载的高效还源自于，它规避了传统架构（如 x86）在 PCIe 带宽限制上不可避免的障碍。下图是使用 XDP 执行负载均衡时，使用 Agilio SmartNIC 硬件卸载与网卡驱动层 XDP，及使用 Intel Xeon CPU E5-2630 的性能对比，前者的数据包处理表现近乎是后者单核的 12 倍。
 
 ![img](files/feasibility/Load-Balancer-Performance.png)
 
+*图：XDP 在不同层处性能对比*
+
 同时，低延迟性也是选择硬件卸载 eBPF 的关键理由。由于 eBPF 程序直接在网卡上运行，数据包不必在跨越 PCIe 带宽造成的障碍，进而达到改善负载平衡和维护 DDoS 网络安全。下图展示了 XDP 在硬件卸载和网卡驱动层两个方式下的延迟对比，特别的，硬件卸载的延迟十分稳定。
 
 ![img](files/feasibility/XDP-Latency.png)
+
+*图：不同方式的延迟时间对比*
 
 ## 技术路线
 

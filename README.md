@@ -13,7 +13,7 @@ Our group members:
 
 调研报告: [Markdown Version](docs/research.md) | [PDF Version](docs/research.pdf)
 
-可行性报告：WIP, before DDL (19/4/9)
+可行性报告: [Markdown Version](docs/feasibility.md) | [PDF Version](docs/feasibility.pdf)
 
 ## Discussion
 

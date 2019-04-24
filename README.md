@@ -15,6 +15,8 @@ Our group members:
 
 可行性报告: [Markdown Version](docs/feasibility.md) | [PDF Version](docs/feasibility.pdf)
 
+中期报告: [PPT](docs/midterm.pptx) | [讲稿](docs/midterm.md)
+
 ## Discussion
 
 讨论记录见 [Discussion](discussion/)

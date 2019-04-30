@@ -118,18 +118,16 @@ int main(void){
             }
             mean/=128.;var/=128.;var-=mean*mean;//这里要转换成高精移位，高精乘和高精减
 
-            //判断关于mean的不等式|mean-MEANmean[0]|>4*VARmean[0]是否成立。注意这里换成了4倍而非5倍是为了用移位替代乘法
-            //这里又涉及到一个非常关键的问题！！！：当我们用高精度整数来表示各个值的时候，
-            //MEANmean的量纲是B-40，VARmean是B-80，所以要比较，就要先把不等式左边先右移40位！！！
-            //这里是浮点数直接算，所以没有移位。
-            if (fabs(mean-MEANmean[0])>4*VARmean[0]) ++tot_mean;//这里注意移位40，用高精度移位替代乘法，还涉及到高精大小不等式判断
-            //分别是不等式左边关于mean的部分，64位ull相减后的绝对值右移42位（40位对齐，2位是右边的“4”），与128位高精度VARmean大小比较
+            //判断关于mean的不等式|mean-MEANmean[0]|>4*Sqrt{VARmean[0]}是否成立。注意这里换成了4倍而非5倍是为了用移位替代乘法
+            //不等式等价于 (mean-MEANmean[0])*(mean-MEANmean[0])/16 > VARmean[0] 是否成立。
+            //不等式左边是64位ull*64位ull=128位高精度，再右移4位，再与不等式右边的128位高精度比较
+            if ((mean-MEANmean[0])*(mean-MEANmean[0])>16*VARmean[0]) ++tot_mean;
 
-            //同样，判断关于var的不等式|var-MEANvar[0]|>8*VARvar[0]是否成立。这里换成了8倍而非10倍。
-            //当我们用高精整数表示浮点数的时候也涉及到转换量纲B-80和B-160的转换！！！
-            if (fabs(var-MEANvar[0])>8*VARvar[0]) ++tot_var;//这里注意移位80，用高精度移位替代乘法，还涉及到高精大小不等式判断
-            //分别是不等式左边关于MEANvar的部分，128位ull相减后的绝对值右移83位（80位对齐，3位是右边的“8”），与256位高精度VARmean大小比较
-
+            //同样，判断关于var的不等式|var-MEANvar[0]|>8*Sqrt{VARvar[0]}是否成立。这里换成了8倍而非10倍。
+            //不等式等价于(var-MEANvar[0])*(var-MEANvar[0])/64 > VARvar[0]
+            //不等式左边是128位高精度*128位高精度=256位高精度，再右移6位，再与不等式右边的256位高精度比较
+            if ((var-MEANvar[0])*(var-MEANvar[0])>64*VARvar[0]) ++tot_var;
+            
             MEANmean[1]+=mean;VARmean[1]+=mean*mean;//这里要转换成高精乘和高精加
             MEANvar[1]+=var;VARvar[1]+=var*var;//这里要转换成高精乘和高精加
         }

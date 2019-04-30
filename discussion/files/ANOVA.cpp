@@ -63,31 +63,34 @@ int main(void){
         除法只涉及到除64，128等2的整次幂，所以只要实现高精度移位。
         综上，要实现高精度加减乘，移位运算。
         */
-        x[count++]=a[0]*a[0]+a[1]*a[1]+a[2]*a[2];//这里要转换成高精乘和高精加
+        x[count++]=a[0]*a[0]+a[1]*a[1]+a[2]*a[2];//这里是26位*26位=52位，52位三个相加最多54位，直接用ull计算
         if (!(count>>9)) continue;//即 count<512
         window_end_time[0]=t;
         /*
         在512个数据中抽样64次，每次抽样128个
         此例使用无放回抽样，被分到这部分锅的人若觉得实现过于复杂任务过于繁重，可以采用有放回抽样，但这种简化很可能让我们的最终结题报告的时候被问的下不来台（
         */
-        MEANmean[0]=0.,VARmean[0]=0.,MEANvar[0]=0.,VARvar[0]=0.;
+        MEANmean[0]=0.,VARmean[0]=0.,MEANvar[0]=0.,VARvar[0]=0.;//MEANmean直接用ull；VARmean用128位高精度；MEANvar用128高精度；VARvar用256位高精度
         for (unsigned int i=0u;!(i>>6);++i){
-            double mean=0.,var=0.;
+            double mean=0.,var=0.;//mean用ull表示，var用128位高精度表示
             unsigned long long vis[8]={0ull};//由于512=64*8，用8个ull来表示这个“是否已抽过”的bool关系就可以
             for (unsigned int j=0u;!(j>>7);){
                 unsigned int k=((unsigned int)rand())&((1u<<9)-1u);//这里的&((1<<9)-1)代表对512取模，它也可以用一次左移再一次右移实现。下面出现的这种写法都一样。
                 if (vis[k>>6] & (1ull << ( k & ((1u<<6) - 1u) ) ) ) continue;
                 vis[k>>6] |= 1ull << ( k & ((1u<<6) - 1u) );
                 ++j;
-                mean+=x[k];var+=x[k]*x[k];//这里要转换成高精乘和高精加
+                mean+=x[k];var+=x[k]*x[k];//mean是最多128个54位相加，直接用ull；var是54位乘54位=108位，用128位高精度
             }
-            mean/=128.;var/=128.;var-=mean*mean;//这里要转换成高精移位，高精乘和高精减
-            MEANmean[0]+=mean;VARmean[0]+=mean*mean;//这里要转换成高精乘和高精加
-            MEANvar[0]+=var;VARvar[0]+=var*var;//这里要转换成高精乘和高精加
+            mean/=128.;//mean右移7位，直接用ull
+            var/=128.;var-=mean*mean;//var用128位右移7位的运算；后一个用ull*ull返回128位高精度的操作
+            MEANmean[0]+=mean;//直接用ull
+            VARmean[0]+=mean*mean;//用64*64加给128位高精度
+            MEANvar[0]+=var;//用128位高精度+128位高精度
+            VARvar[0]+=var*var;//256位高精度+=128位高精度*128位高精度
         }
-        MEANmean[0]/=64;MEANvar[0]/=64;//这里要转换成高精移位
-        VARmean[0]/=64;VARmean[0]-=MEANmean[0]*MEANmean[0];//这里要转换成高精移位，高精乘和高精减
-        VARvar[0]/=64;VARvar[0]-=MEANvar[0]*MEANvar[0];//这里要转换成高精移位，高精乘和高精减
+        MEANmean[0]/=64;MEANvar[0]/=64;//这里要转换成高精移位：分别是ull右移6位，和128位高精度右移6位
+        VARmean[0]/=64;VARmean[0]-=MEANmean[0]*MEANmean[0];//这里要转换成128位高精右移6位，128位高精-=64*64位ull
+        VARvar[0]/=64;VARvar[0]-=MEANvar[0]*MEANvar[0];//这里要转换成256位高精右移6位，256位高精度-=128位*128位高精度
         break;
     }
     //接下来不断处理新的窗口数据
@@ -120,10 +123,12 @@ int main(void){
             //MEANmean的量纲是B-40，VARmean是B-80，所以要比较，就要先把不等式左边先右移40位！！！
             //这里是浮点数直接算，所以没有移位。
             if (fabs(mean-MEANmean[0])>4*VARmean[0]) ++tot_mean;//这里注意移位40，用高精度移位替代乘法，还涉及到高精大小不等式判断
+            //分别是不等式左边关于mean的部分，64位ull相减后的绝对值右移42位（40位对齐，2位是右边的“4”），与128位高精度VARmean大小比较
 
             //同样，判断关于var的不等式|var-MEANvar[0]|>8*VARvar[0]是否成立。这里换成了8倍而非10倍。
             //当我们用高精整数表示浮点数的时候也涉及到转换量纲B-80和B-160的转换！！！
-            if (fabs(var-MEANvar[0])>8*VARvar[0]) ++tot_var;//这里注意移位40，用高精度移位替代乘法，还涉及到高精大小不等式判断
+            if (fabs(var-MEANvar[0])>8*VARvar[0]) ++tot_var;//这里注意移位80，用高精度移位替代乘法，还涉及到高精大小不等式判断
+            //分别是不等式左边关于MEANvar的部分，128位ull相减后的绝对值右移83位（80位对齐，3位是右边的“8”），与256位高精度VARmean大小比较
 
             MEANmean[1]+=mean;VARmean[1]+=mean*mean;//这里要转换成高精乘和高精加
             MEANvar[1]+=var;VARvar[1]+=var*var;//这里要转换成高精乘和高精加

@@ -11,6 +11,8 @@
 #include "bpf_helpers.h"
 #include "bpf_endian.h"
 
+#define FJWTQL 0x216C7174776A6621
+
 int test[100];
 
 struct data {
@@ -83,24 +85,33 @@ static __always_inline bool parse_fjw(void *data, __u64 off, void *data_end,
     if (raw + 1 > data_end)
         return false;
 
-    if (raw->magic != 0x21666A7774716C21) {  // !lqtwjf!
+    if (raw->magic != FJWTQL) {  // !fjwtql!
         return false;
     } else {
-        raw->magic = 0x21626B73666A7721;  // !bkswjf!
-        dt->tag = raw->tag;
-        dt->data[0] = raw->data[0];
-        dt->data[1] = raw->data[1];
-        dt->data[2] = raw->data[2];
-        test[0] = raw->data[0];
-
-        int a = 0, b = 5;
-        int *ret = bpf_map_lookup_elem(&window_map, &b);
-        if (!ret) {
-            return true;
+        // raw->magic = 0x21626B73666A7721;  // modify packet: !bkswjf!
+        if (raw->tag != 0) {
+            return false;
         }
-        bpf_map_update_elem(&window_map, &a, &b, BPF_ANY);
+        for (int i = 0; i < 32; i++) {
+            data->data[i] = raw->data[i];
+        }
     }
     return true;
+}
+
+static __always_inline int modify_tag(void *data, __u64 off, void *data_end) {
+    struct packet_struct *raw;
+
+    raw = data + off;
+    if (raw + 1 > data_end)
+        return false;
+
+    if (raw->magic != FJWTQL) {
+        return false;
+    } else { 
+        raw->tag = 0;
+        return XDP_TX;
+    }
 }
 
 int process_packet(struct xdp_md *ctx)

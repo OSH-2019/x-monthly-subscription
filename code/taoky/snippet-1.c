@@ -14,14 +14,13 @@
 int test[100];
 
 struct data {
-    __u64 timestamp;
-    __u64 data[3];
+    __u64 data[32];
 };
 
-struct raw_data {
-    __u64 sign;
-    __u64 timestamp;
-    __u64 data[3];
+struct packet_struct {
+    __u64 magic;
+    __u64 tag;
+    __u64 data[32];
 };
 
 struct pkt_meta {
@@ -41,19 +40,6 @@ struct pkt_meta {
 	__u32 seq;
 };
 
-struct bpf_map_def SEC("maps") window_map = {
-    .type = BPF_MAP_TYPE_ARRAY,
-    .key_size = sizeof(__u32),
-    .value_size = sizeof(struct data),
-    .max_entries = 512,
-};
-
-// struct bpf_map_def SEC("maps") array_index = {
-//     .type = BPF_MAP_TYPE_ARRAY,
-//     .key_size = sizeof(__u32),
-//     .value_size = sizeof(__u32),
-//     .max_entries = 5,
-// };
 
 /* parser from official xdp example */
 /* assuming: ipv4 & udp */
@@ -88,24 +74,20 @@ static __always_inline bool parse_ip4(void *data, __u64 off, void *data_end)
 	return true;
 }
 
-static __always_inline __u64 double2u64(__u64 input) {
-    return 2;
-}
-
 static __always_inline bool parse_fjw(void *data, __u64 off, void *data_end,
                         struct data *dt)
 {
-    struct raw_data *raw;
+    struct packet_struct *raw;
 
     raw = data + off;
     if (raw + 1 > data_end)
         return false;
 
-    if (raw->sign != 0x21666A7774716C21) {  // !lqtwjf!
+    if (raw->magic != 0x21666A7774716C21) {  // !lqtwjf!
         return false;
     } else {
-        raw->sign = 0x21626B73666A7721;  // !bkswjf!
-        dt->timestamp = raw->timestamp;
+        raw->magic = 0x21626B73666A7721;  // !bkswjf!
+        dt->tag = raw->tag;
         dt->data[0] = raw->data[0];
         dt->data[1] = raw->data[1];
         dt->data[2] = raw->data[2];

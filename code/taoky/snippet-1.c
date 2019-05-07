@@ -92,6 +92,7 @@ static __always_inline bool parse_fjw(void *data, __u64 off, void *data_end,
         if (raw->tag != 0) {
             return false;
         }
+        #pragma clang loop unroll(full)
         for (int i = 0; i < 32; i++) {
             data->data[i] = raw->data[i];
         }

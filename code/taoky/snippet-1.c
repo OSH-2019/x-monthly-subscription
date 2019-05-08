@@ -58,7 +58,8 @@ static __always_inline bool parse_udp(void *data, __u64 off, void *data_end)
 	return true;
 }
 
-static __always_inline bool parse_ip4(void *data, __u64 off, void *data_end)
+static __always_inline bool parse_ip4(void *data, __u64 off, void *data_end, 
+                                    struct pkt_meta *pkt)
 {
 	struct iphdr *iph;
 
@@ -71,7 +72,7 @@ static __always_inline bool parse_ip4(void *data, __u64 off, void *data_end)
 
 	// pkt->src = iph->saddr;
 	// pkt->dst = iph->daddr;
-	// pkt->l4_proto = iph->protocol;
+	pkt->l4_proto = iph->protocol;
 
 	return true;
 }
@@ -94,7 +95,7 @@ static __always_inline bool parse_fjw(void *data, __u64 off, void *data_end,
         }
         #pragma clang loop unroll(full)
         for (int i = 0; i < 32; i++) {
-            data->data[i] = raw->data[i];
+            dt->data[i] = raw->data[i];
         }
     }
     return true;
@@ -134,7 +135,7 @@ int process_packet(struct xdp_md *ctx)
 
     if (pkt.l3_proto == ETH_P_IP) {
         // ipv4
-        if (!parse_ip4(data, off, data_end)) {
+        if (!parse_ip4(data, off, data_end, &pkt)) {
             return XDP_PASS;  // not a valid ipv4 packet
         }
         off += sizeof(struct iphdr);

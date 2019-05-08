@@ -1,0 +1,13 @@
+# Data
+*.txt
+
+# Output program
+send
+
+# Objects
+*.o
+
+# Caches
+*.sw[a-p]
+*.sw_
+*_

@@ -116,6 +116,7 @@ static __always_inline int modify_tag(void *data, __u64 off, void *data_end) {
     }
 }
 
+SEC("xdp")
 int process_packet(struct xdp_md *ctx)
 {
     // ctx->rx_queue_index = 1;

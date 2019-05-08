@@ -10,7 +10,7 @@ AlexNet属于深层卷积神经网络(CNN), 2015年在ImageNet图像识别挑战
 
 #### 结构：
 
- 输入$\rightarrow$ 卷积层1 $\rightarrow^{ReLU}$ 池化层1 $\rightarrow$ 卷积层2 池化$\rightarrow^{ReLU}$ 层2$\rightarrow$卷积层3,4,5$\rightarrow$ 池化层3$\rightarrow^{ReLU}$  全连接层1,2$\rightarrow^{SoftMax}$ 输出
+ 输入$\rightarrow$ 卷积层1 $\rightarrow^{ReLU}$ 池化层1 $\rightarrow$ 卷积层2 $\rightarrow^{ReLU}$ 池化层2$\rightarrow$卷积层3,4,5$\rightarrow$ 池化层3$\rightarrow^{ReLU}$  全连接层1,2$\rightarrow^{SoftMax}$ 输出
 
 #### 数据：
 
@@ -40,8 +40,6 @@ $$
 $$
 Softmax(x_i)=\frac {e^{x_i}} {\Sigma_{j=0}^n e^{x_j}} \in [0,1]
 $$
-
-
 5.ReLU: 激活函数
 $$
 ReLU(x)=max(x,0)
@@ -50,25 +48,25 @@ $$
 
 什么是全连接层<https://zhuanlan.zhihu.com/p/33841176>
 
----
+------
 
 ## 2. AlexNet不可行点
 
-+  真正的AlexNet有7层，650K个神经元，60M个参数，630M次连接，复现极为复杂，更何况我们基本上要从头造轮子，时间绝对不允许
+- 真正的AlexNet有7层，650K个神经元，60M个参数，630M次连接，复现极为复杂，更何况我们基本上要从头造轮子，时间绝对不允许
 
-+ AlexNet训练过程中为了防止过拟合使用了诸如Dropout这样的trick，这个实现起来比较麻烦
+- AlexNet训练过程中为了防止过拟合使用了诸如Dropout这样的trick，这个实现起来比较麻烦
 
-+ 涉及大量矩阵运算，不知道网卡对这个支持怎么样，栈很可能爆炸
+- 涉及大量矩阵运算，不知道网卡对这个支持怎么样，栈很可能爆炸
 
-+ 输出时使用非线性函数如Softmax，对于不支持浮点数的ebpf来说实现起来比较麻烦
+- 输出时使用非线性函数如Softmax，对于不支持浮点数的ebpf来说实现起来比较麻烦
 
-+ 最大的问题可能还是参数的训练，一般的训练方法是使用基于梯度下降误差反向传播算法（BP算法），涉及到求偏导，这个除非我们提前求好式子，把其写在程序里面，否则难以实现。
+- 最大的问题可能还是参数的训练，一般的训练方法是使用基于梯度下降误差反向传播算法（BP算法），涉及到求偏导，这个在网络比较小时，可以采用提前求好算式把其写在程序里的方式凑合，但是网络大时这种方式不可行。
 
   
 
   **总之，真正的AlexNet肯定是做不了的，能做出一个简单的卷积神经网络就不错了。**
 
----
+------
 
 ## 3. 可行性
 
@@ -104,7 +102,7 @@ __u8** ReLU(__u8 *x[],int n){
     __u8 result[n][n];
     for(int i=0;i<n;i++){
         for(int j=0;j<n;j++){
-            result[i][j]=(x[i][j]>0)？x[i][j]:0;
+            result[i][j]=(x[i][j]>0)?x[i][j]:0;
         }
     }
     return result;
@@ -162,8 +160,8 @@ int main(){
     __u8 image[8][8]; 
     
     /* input image */
-    //偏置，是需要的参数
-    __u8 Bias[4][4]; 
+    //偏置，是不需要训练（？）的参数,先设置为0.1
+    __u8 Bias[4][4]={0.1,...}; 
     //学习率，超参数，人为设定，比如说0.4
     const __u8 eta=0.4;  
     //卷积核初始化，可以全赋值为1
@@ -176,7 +174,7 @@ int main(){
         Softmax(
         FullConnectLayer(
         Pooling(ReLU(Convolution(image,filter)+Bias,4))
-    	FCL_filter1,FCL_filter2,FCL_filter3,FCL_filter4))
+    	FCL_filter0,...,FCL_filter9)),10
         );
     
     /*训练：进行验证，误差反向传播，使用BP算法训练参数 
@@ -187,16 +185,17 @@ int main(){
     double loss=(求和(result-true_value)*(result-true_value))/n
        
     //BP 算法，我们得事先把偏导式子都算好
-    //这里要调的参有：卷积核5x5=25 + Bias4x4=16 + FCL卷积核 10x2x2=40 =81个参数
+    //这里要调的参有：卷积核5x5=25 + FCL卷积核 10x2x2=40 =65个参数
     wi-=eta*(A*wi+B*wj+C*wk+...);  
     
     printf("Pridiction is %d",result);
 }
 ```
 
----
+------
 
 ## 3. 参考文献
 
 1. 什么是全连接层<https://zhuanlan.zhihu.com/p/33841176>
-2.  维基百科
+2. 维基百科
+3. 原论文 https://www.nvidia.cn/content/tesla/pdf/machine-learning/imagenet-classification-with-deep-convolutional-nn.pdf

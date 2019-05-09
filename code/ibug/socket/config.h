@@ -1,4 +1,8 @@
-#ifndef TARGET_IFACE
+#ifndef SOURCE_IFACE // In
+#define SOURCE_IFACE "enp1s0np1"
+#endif
+
+#ifndef TARGET_IFACE // Out
 #define TARGET_IFACE "enp1s0np0"
 #endif
 

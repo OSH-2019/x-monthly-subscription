@@ -1,8 +1,10 @@
 # Data
 *.txt
+packet
 
 # Output program
 send
+recv
 
 # Objects
 *.o

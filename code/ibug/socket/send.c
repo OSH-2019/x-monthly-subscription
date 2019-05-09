@@ -12,8 +12,6 @@
 
 typedef unsigned char byte;
 
-void sanity_check(void);
-
 int main(int argc, char** argv) {
     sanity_check();
 
@@ -21,7 +19,10 @@ int main(int argc, char** argv) {
     if (sock < 0)
         errorexit("socket");
 
-    if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, TARGET_IFACE, 1 + strlen(TARGET_IFACE)))
+    char iface[16] = TARGET_IFACE;
+    if (argc >= 2)
+        strcpy(iface, argv[1]);
+    if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, iface, 1 + strlen(iface)))
         errorexit("setsockopt");
     int optval = -1;
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST | SO_REUSEADDR, &optval, sizeof(int)))
@@ -52,16 +53,8 @@ int main(int argc, char** argv) {
         errorexit("send");
     printf("%d bytes sent.\n", sent);
 
-    // if (shutdown(sock, SHUT_RDWR))
     if (close(sock))
         errorexit("close");
 
     return 0;
-}
-
-void sanity_check(void) {
-    if (getuid() || geteuid()) {
-        fprintf(stderr, "Need root to proceed\n");
-        exit(1);
-    }
 }

@@ -15,7 +15,7 @@
 struct packet_struct {
     __u64 magic;
     __u64 tag;
-    __u64 data[32];
+    __u32 data[32];
 };
 /*
 static __always_inline __u32 double_to_u32(__u64 x){

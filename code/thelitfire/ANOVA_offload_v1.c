@@ -27,16 +27,17 @@ __u32 x:
 31               25           10         0
 0 ......        2^15         2^0       2^-10
 */
+/*
 static __always_inline __u32 double_to_u32(__u64 data_double){
     __u32 exponent;
     __u64 x;
     if (data_double==(__u64)0) x=(__u64)0;
     exponent=(__u32)(data_double >> 52)-(__u32)1023;
-    x=data_double&(__u64)0x000FFFFFFFFFFFFF|(__u64)0x0010000000000000;
-    if ((__u32)42-exponent>(__u32)0) x>>=(__u32)42-exponent;
-    else x<<=exponent-(__u32)42;
+    x=((data_double&(__u64)0x000FFFFFFFFFFFFF)|(__u64)0x0010000000000000)>>(((__u32)1065>(__u32)(data_double >> 52))?(__u32)1065-(__u32)(data_double >> 52):(__u32)(data_double >> 52)-(__u32)1065);
     return (__u32)x;
 }
+*/
+#define double_to_u32(x) ((x==(__u64)0)?(__u32)0:(__u32)(((x&(__u64)0x000FFFFFFFFFFFFF)|(__u64)0x0010000000000000)>>(((__u32)1065>(__u32)(x >> 52))?(__u32)1065-(__u32)(x >> 52):(__u32)(x >> 52)-(__u32)1065)))
 /*
 static __always_inline bool parse_fjw(void *data, __u64 off, void *data_end){
     struct packet_struct *raw;

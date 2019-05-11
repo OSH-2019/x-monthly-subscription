@@ -44,11 +44,11 @@ int process_packet(struct xdp_md *ctx)
     __u32 off = sizeof(struct ethhdr) + 28;
     struct packet_struct *raw;
     raw = data + off;
-    if (raw + 1 > data_end) return XDP_DROP;
+    if (raw + 1 > data_end) return XDP_PASS;
     if (raw->magic != MAGIC) {
-        return XDP_DROP;
+        return XDP_PASS;
     } else {
-        if (raw->tag != 0) return XDP_DROP;
+        if (raw->tag != 0) return XDP_PASS;
         //for first 16 data (type __u32), calculate mean and var
         __u32 mean=(__u32)0;
         __u64 var=(__u64)0;

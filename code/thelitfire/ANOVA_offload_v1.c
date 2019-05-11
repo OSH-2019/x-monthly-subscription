@@ -25,7 +25,7 @@ static __always_inline __u32 double_to_u32(__u64 x){
 
 static __always_inline __u64 mul(__u32 a){
     __u16 a2=(a>>16)&(__u32)65535,a1=((a<<16)>>16)&(__u32)65535;
-    return (__u64)a2*a1;
+    return (((__u64)a2*a1)<<17)+(__u64)a1*a1+(((__u64)a2*a2)<<32);
 }
 
 SEC("xdp")

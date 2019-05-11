@@ -1,3 +1,7 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<limits.h>
+#include<time.h>
 // double2u64.c
 // - CA
 //
@@ -13,26 +17,32 @@
 // printf("%llx\n", *((__u64*)&data));
 // printf("%lf\n", *((double*)&exponent));
 
+// ZJX: TEST ACcepted;
+typedef unsigned __u32;
 typedef unsigned long long __u64;
+__u32 double_to_u32(__u64 data){
+    __u32 exponent;
+    __u64 x;
+    if (data==(__u64)0) x=(__u64)0;
+    exponent=(__u32)(data >> 52)-(__u32)1023;
+    x=data&(__u64)0x000FFFFFFFFFFFFF|(__u64)0x0010000000000000;
+    if ((__u32)42-exponent>(__u32)0) x>>=(__u32)42-exponent;
+    else x<<=exponent-(__u32)42;
+    return (__u32)x;
+}
 
-__u64* double2u64(__u64 data[32])
-{
-    
-    int i;
-    __u64 exponent;
-    __u64 x[32];
-
-    for (i = 0; i < 32; i++)
-    {
-        if(data == 0)
-            continue;
-        exponent = (data >> 52) -1023;
-        x = data & 0x000FFFFFFFFFFFFFull | 0x0010000000000000ull;
-        if(42ull - exponent > 0ull)
-            x >>= 42ull - exponent;
-        else
-            x <<= exponent - 42ull;
-    }
-
-    return x;
+int main(void){
+	srand(time(0));
+	for (int i=0;i<10000;++i){
+		double a=(double)rand()+(double)rand()/4096.0;
+		freopen("1.txt","wb",stdout);
+		fwrite(&a,sizeof(double),(size_t)1,stdout);
+		fclose(stdout);
+		freopen("1.txt","rb",stdin);
+		__u64 b;fread(&b,sizeof(__u64),(size_t)1,stdin);
+		__u32 x=double_to_u32(b);
+		fclose(stdin);
+		if ((__u32)(a*1024.0)!=x) return 255;
+	}
+	return 0;
 }

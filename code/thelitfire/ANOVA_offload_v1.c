@@ -22,6 +22,12 @@ static __always_inline __u32 double_to_u32(__u64 x){
     return ((x==(__u64)0)?(__u32)0:(__u32)(((x&(__u64)0x000FFFFFFFFFFFFF)|(__u64)0x0010000000000000)>>(((__u32)1065>(__u32)(x >> 52))?(__u32)1065-(__u32)(x >> 52):(__u32)(x >> 52)-(__u32)1065)));
 }
 */
+
+static __always_inline __u64 mul(__u32 a){
+    __u64 a2=a>>16,a1=(a<<16)>>16;
+    return a1*a1+((a2*a1+a1*a2)<<16)+(a2*a2<<32);
+}
+
 SEC("xdp")
 int process_packet(struct xdp_md *ctx)
 {
@@ -38,23 +44,23 @@ int process_packet(struct xdp_md *ctx)
         //for first 16 data (type __u32), calculate mean and var
         __u32 dt,mean=(__u32)0;
         __u64 var=(__u64)0;
-        dt=(raw->data[0]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[1]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[2]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[3]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[4]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[5]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[6]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[7]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[8]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[9]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[10]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[11]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[12]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[13]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[14]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        dt=(raw->data[15]);mean+=dt;var+=(__u64)dt*(__u64)dt;
-        mean>>=4;var>>=4;var-=(__u64)mean*mean;
+        dt=(raw->data[0]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[1]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[2]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[3]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[4]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[5]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[6]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[7]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[8]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[9]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[10]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[11]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[12]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[13]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[14]);mean+=dt;var+=mul(dt);
+        dt=(raw->data[15]);mean+=dt;var+=mul(dt);
+        mean>>=4;var>>=4;var-=mul(mean);
         const __u32 e=0x66;
         const __u16 e2=0x28A4;
         __u16 tot=(__u32)0;

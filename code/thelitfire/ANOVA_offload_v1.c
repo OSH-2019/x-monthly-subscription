@@ -95,7 +95,7 @@ int process_packet(struct xdp_md *ctx)
     void *data_end = (void *)(long)ctx->data_end;
 	void *data = (void *)(long)ctx->data;
     __u32 off = sizeof(struct ethhdr) + 28;
-    if (!parse_fjw(data, off, data_end, &dt)) {
+    if (!parse_fjw(data, off, data_end)) {
         return XDP_DROP;
     }
     return XDP_PASS;

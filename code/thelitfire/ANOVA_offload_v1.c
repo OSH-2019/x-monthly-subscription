@@ -52,15 +52,15 @@ int process_packet(struct xdp_md *ctx)
         dt=(raw->data[5]);mean+=dt;var+=mul(dt);
         dt=(raw->data[6]);mean+=dt;var+=mul(dt);
         dt=(raw->data[7]);mean+=dt;var+=mul(dt);
-        dt=(raw->data[8]);mean+=dt;var+=mul(dt);
+        /*dt=(raw->data[8]);mean+=dt;var+=mul(dt);
         dt=(raw->data[9]);mean+=dt;var+=mul(dt);
         dt=(raw->data[10]);mean+=dt;var+=mul(dt);
         dt=(raw->data[11]);mean+=dt;var+=mul(dt);
         dt=(raw->data[12]);mean+=dt;var+=mul(dt);
         dt=(raw->data[13]);mean+=dt;var+=mul(dt);
         dt=(raw->data[14]);mean+=dt;var+=mul(dt);
-        dt=(raw->data[15]);mean+=dt;var+=mul(dt);
-        mean>>=4;var>>=4;var-=mul(mean);
+        dt=(raw->data[15]);mean+=dt;var+=mul(dt);*/
+        mean>>=3;var>>=3;var-=mul(mean);
         const __u32 e=0x66;
         const __u16 e2=0x28A4;
         __u16 tot=(__u32)0;
@@ -72,7 +72,7 @@ int process_packet(struct xdp_md *ctx)
         dt=(raw->data[20]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
         dt=(raw->data[21]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
         dt=(raw->data[22]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
-        dt=(raw->data[23]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
+        dt=(raw->data[23]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );/*
         dt=(raw->data[24]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
         dt=(raw->data[25]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
         dt=(raw->data[26]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
@@ -80,9 +80,9 @@ int process_packet(struct xdp_md *ctx)
         dt=(raw->data[28]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
         dt=(raw->data[29]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
         dt=(raw->data[30]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
-        dt=(raw->data[31]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );
+        dt=(raw->data[31]);tot+=( dt>=mean ? (dt-mean>=e ? (__u16)1 : (__u16)0) : (mean-dt>=e ? (__u16)1 : (__u16)0) );*/
 
-        if ((__u64)((__u32)tot*e2) > (var<<4)){
+        if ((__u64)((__u32)tot*e2) > (var<<3)){
             raw->tag = (__u64)1;// hua fen！
         }else{
             raw->tag = (__u64)2;// no hua fen

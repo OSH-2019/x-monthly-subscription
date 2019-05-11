@@ -17,9 +17,9 @@ struct packet_struct {
     __u64 tag;
     __u64 data[32];
 };
-
-#define double_to_u32(x) ((x==(__u64)0)?(__u32)0:(__u32)(((x&(__u64)0x000FFFFFFFFFFFFF)|(__u64)0x0010000000000000)>>(((__u32)1065>(__u32)(x >> 52))?(__u32)1065-(__u32)(x >> 52):(__u32)(x >> 52)-(__u32)1065)))
-
+static __always_inline __u32 double_to_u32(__u64 x){
+    return ((x==(__u64)0)?(__u32)0:(__u32)(((x&(__u64)0x000FFFFFFFFFFFFF)|(__u64)0x0010000000000000)>>(((__u32)1065>(__u32)(x >> 52))?(__u32)1065-(__u32)(x >> 52):(__u32)(x >> 52)-(__u32)1065)))
+}
 SEC("xdp")
 int process_packet(struct xdp_md *ctx)
 {

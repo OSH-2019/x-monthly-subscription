@@ -23,11 +23,18 @@ static __always_inline __u32 double_to_u32(__u64 x){
 }
 */
 
-static __always_inline __u64 mul(__u32 a){
+static __always_inline __u64 mul2(__u32 a){
     __u16 a2=(a>>16)&(__u32)65535,a1=((a<<16)>>16)&(__u32)65535;
-    return (((__u64)a2*a1)<<17)+(__u64)a1*a1+(((__u64)a2*a2)<<32);
+    return (__u64)a2*a1;
 }
-
+static __always_inline __u64 mul3(__u32 a){
+    __u16 a2=(a>>16)&(__u32)65535,a1=((a<<16)>>16)&(__u32)65535;
+    return (__u64)a2*a2;
+}
+static __always_inline __u64 mul1(__u32 a){
+    __u16 a2=(a>>16)&(__u32)65535,a1=((a<<16)>>16)&(__u32)65535;
+    return (__u64)a1*a1;
+}
 SEC("xdp")
 int process_packet(struct xdp_md *ctx)
 {
@@ -44,14 +51,14 @@ int process_packet(struct xdp_md *ctx)
         //for first 16 data (type __u32), calculate mean and var
         __u32 mean=(__u32)0;
         __u64 var=(__u64)0;
-        mean+=raw->data[0];var+=mul(raw->data[0]);
-        mean+=raw->data[0];var+=mul(raw->data[0]);
-        mean+=raw->data[0];var+=mul(raw->data[0]);
-        mean+=raw->data[0];var+=mul(raw->data[0]);
-        mean+=raw->data[0];var+=mul(raw->data[0]);
-        mean+=raw->data[0];var+=mul(raw->data[0]);
-        mean+=raw->data[0];var+=mul(raw->data[0]);
-        mean+=raw->data[0];var+=mul(raw->data[0]);
+        mean+=raw->data[0];var+=(mul3(raw->data[0])<<32)+(mul2(raw->data[0])<<17)+(mul1(raw->data[0]));
+        mean+=raw->data[1];var+=(mul3(raw->data[1])<<32)+(mul2(raw->data[1])<<17)+(mul1(raw->data[1]));
+        mean+=raw->data[2];var+=(mul3(raw->data[2])<<32)+(mul2(raw->data[2])<<17)+(mul1(raw->data[2]));
+        mean+=raw->data[3];var+=(mul3(raw->data[3])<<32)+(mul2(raw->data[3])<<17)+(mul1(raw->data[3]));
+        mean+=raw->data[4];var+=(mul3(raw->data[4])<<32)+(mul2(raw->data[4])<<17)+(mul1(raw->data[4]));
+        mean+=raw->data[5];var+=(mul3(raw->data[5])<<32)+(mul2(raw->data[5])<<17)+(mul1(raw->data[5]));
+        mean+=raw->data[6];var+=(mul3(raw->data[6])<<32)+(mul2(raw->data[6])<<17)+(mul1(raw->data[6]));
+        mean+=raw->data[7];var+=(mul3(raw->data[7])<<32)+(mul2(raw->data[7])<<17)+(mul1(raw->data[7]));
         mean>>=3;var>>=3;var-=mul(mean);
         const __u32 e=0x66;
         const __u16 e2=0x28A4;

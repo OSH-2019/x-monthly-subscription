@@ -15,7 +15,7 @@
 struct packet_struct {
     __u64 magic;
     __u64 tag;
-    __u32 data[32];
+    __u32 data[16];
 };
 /*
 static __always_inline __u32 double_to_u32(__u64 x){
@@ -65,14 +65,14 @@ int process_packet(struct xdp_md *ctx)
         const __u16 e2=0x28A4;
         __u16 tot=(__u32)0;
 
-        tot+=( raw->data[16]>=mean ? (raw->data[16]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[16]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[17]>=mean ? (raw->data[17]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[17]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[18]>=mean ? (raw->data[18]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[18]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[19]>=mean ? (raw->data[19]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[19]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[20]>=mean ? (raw->data[20]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[20]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[21]>=mean ? (raw->data[21]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[21]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[22]>=mean ? (raw->data[22]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[22]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[23]>=mean ? (raw->data[23]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[23]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[8]>=mean ? (raw->data[8]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[8]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[9]>=mean ? (raw->data[9]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[9]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[10]>=mean ? (raw->data[10]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[10]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[11]>=mean ? (raw->data[11]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[11]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[12]>=mean ? (raw->data[12]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[12]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[13]>=mean ? (raw->data[13]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[13]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[14]>=mean ? (raw->data[14]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[14]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[15]>=mean ? (raw->data[15]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[15]>=e ? (__u16)1 : (__u16)0) );
         if ((__u64)((__u32)tot*e2) > (var<<3)){
             raw->tag = (__u64)1;// hua fen！
         }else{

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <linux/if_packet.h>
@@ -29,13 +30,15 @@ __inline__ uint64_t time_cnt(void) {
     return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {	
+    int times = 10;
+    int correct_data = true;
     if (getuid() || geteuid()) {
         fprintf(stderr, "Need root to proceed\n");
         exit(-1);
     }
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-        fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH] [TEST TIMES] [CORRECT? (1/0)]\n", argv[0]);
         exit(-1);
     }
     int sock_send = Socket(AF_INET, SOCK_DGRAM, 0);
@@ -46,9 +49,12 @@ int main(int argc, char** argv) {
     if (argc >= 3) {
         strcpy(recv_iface, argv[1]);
         strcpy(send_iface, argv[2]);
+        if (argc >= 4) times = atoi(argv[3]);
+        if (argc >= 5 && strcmp("0", argv[4]) == 0)
+            correct_data = 0;
     }
 
-    unsigned ifacenum = if_nametoindex(recv_iface), opt = 1;
+    unsigned ifacenum = if_nametoindex(recv_iface);
     int optval = -1;
 
     Setsockopt(sock_send, SOL_SOCKET, SO_BINDTODEVICE, send_iface, 1 + strlen(send_iface));
@@ -69,7 +75,6 @@ int main(int argc, char** argv) {
 
     size_t bufsize = 8192, cbufsize = 1024;
     byte *recv_buf = malloc(bufsize), *cbuf = malloc(cbufsize);
-    unsigned long magic = MAGIC;
     struct iovec iov = {
         .iov_base = recv_buf,
         .iov_len = bufsize
@@ -83,35 +88,41 @@ int main(int argc, char** argv) {
         .msg_controllen = (socklen_t)cbufsize,
         .msg_flags = 0
     };
-    int saddr_size = sizeof(struct sockaddr), received;
-    struct cmsghdr *cmsg;
+    int received;
+    for (int t = 0; t < times; t++) {
+        byte send_buf[272];
+        // Prepare data
+        {
+            if (correct_data) {
+                unsigned long magic = MAGIC;
+                memcpy(send_buf + 0, &magic, sizeof magic);
+                unsigned long zero = 0UL;
+                memcpy(send_buf + 8, &zero, sizeof zero);
+                double data;
+                for (int i = 0; i < 32; i++) {
+                    scanf(" %lf", &data);
+                    memcpy(send_buf + 16 + 8 * i, &data, sizeof data);
+                }
+            } else {
+                int fd = open("/dev/urandom", O_RDONLY);
+                read(fd, send_buf, 272);
+                send_buf[0] = send_buf[7] = '!';
+                close(fd);
+            }
+        }
 
-    byte send_buf[272];
-    // Prepare data
-    {
-        unsigned long magic = MAGIC;
-        memcpy(send_buf + 0, &magic, sizeof magic);
-        unsigned long zero = 0UL;
-        memcpy(send_buf + 8, &zero, sizeof zero);
-        double data;
-        for (int i = 0; i < 32; i++) {
-            scanf(" %lf", &data);
-            memcpy(send_buf + 16 + 8 * i, &data, sizeof data);
+        uint64_t t1 = time_cnt();
+        Sendto(sock_send, send_buf, sizeof(send_buf), 0, (struct sockaddr*)&target_addr, sizeof(struct sockaddr));
+        for (;;) {
+            received = Recvmsg(sock_recv, &msg, 0);
+            if (received == 0 || recv_buf[28] != '!' || recv_buf[35] != '!') { // Bad magic, not constructed by this program
+                ;
+            } else {
+                uint64_t t2 = time_cnt();
+                printf("%ld %ld %ld\n", t1, t2, t2 - t1);
+                break;
+            }
         }
     }
-
-    Sendto(sock_send, send_buf, sizeof(send_buf), 0, (struct sockaddr*)&target_addr, sizeof(struct sockaddr));
-    uint64_t t1 = time_cnt();
-    // ...
-    received = Recvmsg(sock_recv, &msg, 0);
-    // if (received == 0)
-    //     break;
-    if (recv_buf[28] != '!' || recv_buf[35] != '!') { // Bad magic
-        ;
-    } else {
-        uint64_t t2 = time_cnt();
-        printf("%ld %ld\n", t1, t2);
-    }
-
     return 0;
 }

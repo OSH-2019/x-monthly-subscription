@@ -17,8 +17,8 @@
 
 typedef unsigned char byte;
 
-#define SOURCE_IFACE "enp1s0np1"
-#define TARGET_IFACE "enp1s0np0"
+#define SOURCE_IFACE "ens160np0"
+#define TARGET_IFACE "ens160np1"
 #define UDP_PORT 6666
 #define MAGIC 0x216C7174786A7A21UL
 
@@ -44,8 +44,8 @@ int main(int argc, char** argv) {
     int sock_send = Socket(AF_INET, SOCK_DGRAM, 0);
     int sock_recv = Socket(AF_PACKET, SOCK_DGRAM, 0);
 
-    char send_iface[16] = TARGET_IFACE;
-    char recv_iface[16] = SOURCE_IFACE;
+    char send_iface[16] = SOURCE_IFACE;
+    char recv_iface[16] = TARGET_IFACE;
     if (argc >= 3) {
         strcpy(recv_iface, argv[1]);
         strcpy(send_iface, argv[2]);

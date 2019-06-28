@@ -1,0 +1,1 @@
+../../thelitfire/ANOVA-example/data_000001SZ.txt

@@ -1,9 +1,6 @@
 #include "fatal_posix.h"
 #include "config.h"
-#include <string.h>
-#include <net/if.h>
-#include <arpa/inet.h>
-#include <linux/if_packet.h>
+#include "prepare.h"
 
 int sender_prepare(char *send_iface) {
     int sock_send = Socket(AF_INET, SOCK_DGRAM, 0);
@@ -45,4 +42,41 @@ void recv_msgvar(struct msghdr *msg, byte *recv_buf, size_t bufsize) {
     msg->msg_control = cbuf;
     msg->msg_controllen = (socklen_t)cbufsize;
     msg->msg_flags = 0;
+}
+
+void hexdump(const unsigned char* s, size_t len) {
+    size_t x = 0;
+    while (x + 16 <= len) {
+        printf("%08lX  ", x);
+        for (size_t i = x; i < x + 8; i++)
+            printf("%02X ", s[i]);
+        for (size_t i = x + 8; i < x + 16; i++)
+            printf(" %02X", s[i]);
+        printf("  |");
+        for (size_t i = x; i < x + 16; i++)
+            putchar((s[i] >= 32 && s[i] < 127) ? s[i] : '.');
+        printf("|\n");
+        x += 16;
+    }
+    if (x < len) {
+        printf("%08lX  ", x);
+        for (size_t i = x; i < x + 8 && i < len; i++)
+            printf("%02X ", s[i]);
+        for (size_t i = x + 8; i < len; i++)
+            printf(" %02X", s[i]);
+        int padding = 2 + 3 * (16 + x - len);
+        char t[8];
+        snprintf(t, sizeof(t), "%%%ds|", padding);
+        printf(t, "");
+        for (size_t i = x; i < len; i++)
+            putchar((s[i] >= 32 && s[i] < 127) ? s[i] : '.');
+        printf("|\n");
+    }
+    printf("%08zX\n", len);
+}
+void require_root() {
+    if (getuid() || geteuid()) {
+        fprintf(stderr, "Need root to proceed\n");
+        exit(-1);
+    }
 }

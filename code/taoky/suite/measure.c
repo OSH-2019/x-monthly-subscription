@@ -28,10 +28,7 @@ __inline__ uint64_t time_cnt(void) {
 int main(int argc, char** argv) {	
     int times = 10;
     int correct_data = true;
-    if (getuid() || geteuid()) {
-        fprintf(stderr, "Need root to proceed\n");
-        exit(-1);
-    }
+    require_root();
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
         fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH] [TEST TIMES] [CORRECT? (1/0)]\n", argv[0]);
         exit(-1);

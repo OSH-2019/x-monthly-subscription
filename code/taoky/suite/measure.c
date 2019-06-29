@@ -49,27 +49,14 @@ int main(int argc, char** argv) {
     int sock_send = sender_prepare(send_iface);
     int sock_recv = receiver_prepare(recv_iface);
 
-    struct sockaddr_in target_addr = {
-        .sin_family = AF_INET,
-        .sin_addr.s_addr = 0xFFFFFFFF,
-        .sin_port = htons(UDP_PORT)
-    };
+    struct sockaddr_in target_addr;
+    send_targetaddr(&target_addr);
 
-    size_t bufsize = 8192, cbufsize = 1024;
-    byte *recv_buf = malloc(bufsize), *cbuf = malloc(cbufsize);
-    struct iovec iov = {
-        .iov_base = recv_buf,
-        .iov_len = bufsize
-    };
-    struct msghdr msg = {
-        .msg_name = NULL,
-        .msg_namelen = (socklen_t)0,
-        .msg_iov = &iov,
-        .msg_iovlen = 1,
-        .msg_control = cbuf,
-        .msg_controllen = (socklen_t)cbufsize,
-        .msg_flags = 0
-    };
+    size_t bufsize = 8192;
+    byte *recv_buf = malloc(bufsize);
+    struct msghdr msg;
+    recv_msgvar(&msg, recv_buf, bufsize);
+
     int received;
     for (int t = 0; t < times; t++) {
         byte send_buf[272];

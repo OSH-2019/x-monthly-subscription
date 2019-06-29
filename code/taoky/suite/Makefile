@@ -1,4 +1,4 @@
-measure_objects = measure.o fatal_posix.o
+measure_objects = measure.o fatal_posix.o prepare.o
 
 CC = gcc
 CFLAGS = -Wall -Wextra -O2 -std=gnu11

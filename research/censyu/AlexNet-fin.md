@@ -11,6 +11,30 @@ AlexNet属于深层卷积神经网络(CNN), 2015年在ImageNet图像识别挑战
 |     局部归一化     |         提高精度         |
 | 数据扩充 & Dropout |        减少过拟合        |
 
++ ReLU作为激活函数。
+
+ReLU为非饱和函数，论文中验证其效果在较深的网络超过了SIgmoid，成功解决了SIgmoid在网络较深时的梯度弥散问题。
+
++ Dropout避免模型过拟合
+
+在训练时使用Dropout随机忽略一部分神经元，以避免模型过拟合。在alexnet的最后几个全连接层中使用了Dropout。
+
++ 重叠的最大池化
+
+之前的CNN中普遍使用平均池化，而Alexnet全部使用最大池化，避免平均池化的模糊化效果。并且，池化的步长小于核尺寸，这样使得池化层的输出之间会有重叠和覆盖，提升了特征的丰富性。
+
++ 提出LRN层
+
+提出LRN层，对局部神经元的活动创建竞争机制，使得响应较大的值变得相对更大，并抑制其他反馈较小的神经元，增强了模型的泛化能力。
+
++ GPU加速
+
+将卷积池化部分分成两组交给两个GPU完成，利用 GPU 计算能力增加计算速度
+
++ 数据增强
+
+随机从256*256的原始图像中截取224*224大小的区域（以及水平翻转的镜像），相当于增强了（256-224）*（256-224）*2=2048倍的数据量。使用了数据增强后，减轻过拟合，提升泛化能力。避免因为原始数据量的大小使得参数众多的CNN陷入过拟合中。
+
 ###结构
 
 ![alexnet-original](AlexNet-fin.assets/alexnet-original.jpg)
@@ -31,6 +55,7 @@ AlexNet属于深层卷积神经网络(CNN), 2015年在ImageNet图像识别挑战
 
 #### 参数 & 输入
 
+输入数据以及在 L1、L2 两层的权重和偏置，用矩阵表示如下
 $$
 \begin{cases}
 W(weight)=\begin{pmatrix}
@@ -46,31 +71,62 @@ x_2\\
 \vdots\\
 x_n
 \end{pmatrix}
+\
+b(bias)=\begin{pmatrix}
+b_1\\
+b_2\\
+\vdots\\
+b_m
+\end{pmatrix}
 \end{cases}
 $$
 
-#### ReLU
+#### 函数
+
+下面是会用到的函数，以及其导数
+
+##### ReLU
+
 $$
+\begin{equation}
+\begin{cases}
 ReLU(x) = max\{0, x\}
+\\[2ex]
+ReLU'(x) =
+\begin{cases}
+0\quad if\ x<0 \\
+1\quad if\ x>0
+\end{cases}
+\end{cases}
+\end{equation}
 $$
 
-#### Softmax
+##### Softmax
 
 $$
-Softmax(x) = \frac{e^x_i}{\Sigma_{i = 1}^{n} e^x_i}
+\begin{cases}
+Softmax(x_i) = \frac{e^{x_i}}{\Sigma_{j = 1}^{n} e^{x_j}} \\
+Softamx'(x_i) = \frac{e^{x_i}(\Sigma_{j=1}^{n}e^{x_j}-e^{x_i})}{(\Sigma_{j = 1}^{n} e^{x_j})^2}
+\end{cases}
 $$
 
-#### 逻辑回归损失函数（MLL）
+##### 逻辑回归损失函数（MLL）
 
 $$
-Loss = -\frac1N \sum_{i=1}^{n} ln(S_i|i = Lable)
+\begin{cases}
+Loss = -\frac1N \sum_{i=1}^{n} ln(S_i|i = Lable) \\
+\frac{\partial Loss}{\partial S_i} = -\frac{1}{NS_i}
+\end{cases}
 $$
 
 #### 前向传播
 
+在两个全连接层，计算该层输出结果使用如下公式：
 $$
 L_{i+1} = W_iL_{i} + b_i
 $$
+
+对于 ReLIU 和 Softmax 层，函数作用在矩阵上的方式为作用在矩阵的每个元素上
 
 #### 输出层
 
@@ -84,6 +140,7 @@ $$
 
 #### 梯度下降
 
+计算每层输出对于输入的梯度：
 $$
 \begin{cases}
 \nabla_S Loss = 
@@ -134,6 +191,8 @@ $$
 $$
 \frac{\partial Loss}{\partial LP_{ij}} = \frac{\partial Loss}{\partial L_i} \cdots \frac{\partial L_j}{\partial LP_{ij}}
 $$
+
+这样可以得到偏差对于每层输入的梯度
 
 #### 更新参数
 
@@ -273,7 +332,7 @@ int main(){
 }
 ```
 
-### 实现思路：
+### 实现思路
 
 Agilio SmartNIC 上有很多相对独立的流处理核心，可以给每个核心分配不同的计算任务，使其充当上述神经网络中某一个节点或者计算对应的梯度（偏导数），并且给 L1、L2 层分配一定的存储空间来储存权重矩阵和偏置参数以及中间数据。此外还应有整体控制模块，用来发出信号，控制每个核心的工作顺序。
 

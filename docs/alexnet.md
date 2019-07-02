@@ -535,3 +535,4 @@ int main(){
    b.<http://vision.stanford.edu/teaching/cs231b_spring1415/slides/alexnet_tugce_kyunghee.pdf>
 
 6. 全连接层：https://zhuanlan.zhihu.com/p/33841176
+

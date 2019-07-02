@@ -5,3 +5,6 @@
 # C
 *.o
 !bpf*.o
+
+# jekyll
+_site

@@ -52,7 +52,7 @@ struct packet {
 3. 发送包（`sendto()`）
 4. 接收包（`recvmsg()`）、判断是否是本程序发送的（判断 flag）
 5. 如果是，再执行 `rdtscp`，求差。
-6. 执行多次。
+6. 2 至 5 步执行 1000 次，然后再执行 n 次，直到最小值恒定。
 
 ## 发送与接收程序
 
@@ -64,7 +64,7 @@ struct packet {
 
 输入 `./xxx --help` 可以获取帮助。
 
-- `measure` 参数分别为 `[接收数据包的 interface] [发送数据包的 interface] [测试次数] [是否发送正确的数据包（1 为正确，0 为错误，错误时从 /dev/urandom 读取随机字符串）]`
+- `measure` 参数分别为 `[接收数据包的 interface] [发送数据包的 interface] [n] [是否发送正确的数据包（1 为正确，0 为错误，错误时从 /dev/urandom 读取随机字符串）]`
 - `sender` 参数为 `[发送数据包的 interface] [数据文件名]`
 - `receiver` 参数为 `[接收数据包的 interface] [信息详细程度（0: 只显示 tag 是否与预期一致，1: 检查 magic 是否完全正确，输出接收到的数据内容，2: 额外显示接收的包的 hexdump）]`
 

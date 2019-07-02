@@ -17,6 +17,8 @@
 #include "prepare.h"
 #include "config.h"
 
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 __inline__ uint64_t time_cnt(void) {
     uint32_t lo, hi;
     __asm__ __volatile__ (
@@ -25,12 +27,30 @@ __inline__ uint64_t time_cnt(void) {
     return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 }
 
+__inline uint64_t measure(int sock_send, int sock_recv, byte *send_buf, struct sockaddr_in target_addr, struct msghdr *msg, byte *recv_buf) {
+    int received;
+    uint64_t t1 = time_cnt();
+    uint64_t t2;
+    Sendto(sock_send, send_buf, sizeof(send_buf), 0, (struct sockaddr*)&target_addr, sizeof(struct sockaddr));
+    for (;;) {
+        received = Recvmsg(sock_recv, msg, 0);
+        if (received == 0 || recv_buf[28] != '!' || recv_buf[35] != '!') { // Bad magic, not constructed by this program
+            ;
+        } else {
+            t2 = time_cnt();
+            // printf("%ld %ld %ld\n", t1, t2, t2 - t1);
+            break;
+        }
+    }
+    return t2 - t1;
+}
+
 int main(int argc, char** argv) {	
-    int times = 10;
+    int check_times = 10;
     int correct_data = true;
     require_root();
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-        fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH] [TEST TIMES] [CORRECT? (1/0)]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH] [TEST CHECK TIMES] [CORRECT? (1/0)]\n", argv[0]);
         exit(-1);
     }
 
@@ -39,7 +59,7 @@ int main(int argc, char** argv) {
     if (argc >= 3) {
         strcpy(recv_iface, argv[1]);
         strcpy(send_iface, argv[2]);
-        if (argc >= 4) times = atoi(argv[3]);
+        if (argc >= 4) check_times = atoi(argv[3]);
         if (argc >= 5 && strcmp("0", argv[4]) == 0)
             correct_data = 0;
     }
@@ -54,41 +74,43 @@ int main(int argc, char** argv) {
     struct msghdr msg;
     recv_msgvar(&msg, recv_buf, bufsize);
 
-    int received;
-    for (int t = 0; t < times; t++) {
-        byte send_buf[272];
-        // Prepare data
-        {
-            if (correct_data) {
-                unsigned long magic = MAGIC;
-                memcpy(send_buf + 0, &magic, sizeof magic);
-                unsigned long zero = 0UL;
-                memcpy(send_buf + 8, &zero, sizeof zero);
-                double data;
-                for (int i = 0; i < 32; i++) {
-                    scanf(" %lf", &data);
-                    memcpy(send_buf + 16 + 8 * i, &data, sizeof data);
-                }
-            } else {
-                int fd = open("/dev/urandom", O_RDONLY);
-                read(fd, send_buf, 272);
-                send_buf[0] = send_buf[7] = '!';
-                close(fd);
+    byte send_buf[272];
+    // Prepare data
+    {
+        if (correct_data) {
+            unsigned long magic = MAGIC;
+            memcpy(send_buf + 0, &magic, sizeof magic);
+            unsigned long zero = 0UL;
+            memcpy(send_buf + 8, &zero, sizeof zero);
+            double data;
+            for (int i = 0; i < 32; i++) {
+                scanf(" %lf", &data);
+                memcpy(send_buf + 16 + 8 * i, &data, sizeof data);
             }
-        }
-
-        uint64_t t1 = time_cnt();
-        Sendto(sock_send, send_buf, sizeof(send_buf), 0, (struct sockaddr*)&target_addr, sizeof(struct sockaddr));
-        for (;;) {
-            received = Recvmsg(sock_recv, &msg, 0);
-            if (received == 0 || recv_buf[28] != '!' || recv_buf[35] != '!') { // Bad magic, not constructed by this program
-                ;
-            } else {
-                uint64_t t2 = time_cnt();
-                printf("%ld %ld %ld\n", t1, t2, t2 - t1);
-                break;
-            }
+        } else {
+            int fd = open("/dev/urandom", O_RDONLY);
+            read(fd, send_buf, 272);
+            send_buf[0] = send_buf[7] = '!';
+            close(fd);
         }
     }
+
+    uint64_t min_time = UINT64_MAX;
+    for (int t = 0; t < 1000; t++) {
+        uint64_t this_time = measure(sock_send, sock_recv, send_buf, target_addr, &msg, recv_buf);
+        min_time = MIN(min_time, this_time);
+    }
+    uint64_t min_time_2 = min_time;
+    for (;;) {
+        for (int t = 0; t < check_times; t++) {
+            uint64_t this_time = measure(sock_send, sock_recv, send_buf, target_addr, &msg, recv_buf);
+            min_time_2 = MIN(min_time_2, this_time);
+        }
+        if (min_time_2 == min_time)
+            break;
+        min_time = min_time_2;
+    }
+
+    printf("%ld\n", min_time);
     return 0;
 }

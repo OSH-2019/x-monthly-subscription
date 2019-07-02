@@ -145,13 +145,13 @@ Softmax 被用于接收来自全连接层的输入，产生最后的结果（以
 
 公式如下：
 $$
-Softmax(x_i)=\frac {e^{x_i}} {\Sigma_{j=0}^n e^{x_j}} \in [0,1]
+\textrm{Softmax}(x_i)=\frac {e^{x_i}} {\Sigma_{j=0}^n e^{x_j}} \in [0,1]
 $$
 Softmax 函数的值域是 $[0,1]$，很容易想到，这正是输出结果 $label=x_i$ 的概率 $P(x_i)$。
 
 在我们小组的实现方案中，为了方便进行数据处理，我们将公式中的 $ e$ 替换为 2。这样幂次可以直接通过移位实现。
 $$
-Softmax^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
+\textrm{Softmax}^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
 $$
 
 ### 5. 前向传播
@@ -169,7 +169,7 @@ $$
 
 根据微积分知识我们易知函数梯度的逆方向是函数值下降最快的方向。因此，对需要调整的参数 $W$，若我们能够求出损失函数关于当前 $W$ 的偏导数值, 并人为设定基于该偏导数的梯度下降步长 $\eta$（称为学习率），可由下公式得到更新后的 $W$:
 $$
-W^{'}= W-\eta\times\frac {\partial f_{Loss}} {\partial W}
+W^{'}= W-\eta\times\frac {\partial f_{\textrm{Loss}}} {\partial W}
 $$
 梯度下降直观过程如下图。类似一步步走下山坡知道最低点（存在的问题是得到的目标点有可能是极小值点而非最小值点）
 
@@ -180,21 +180,21 @@ $$
 输入数据以及在 L1、L2 两层的权重和偏置，用矩阵表示如下:
 $$
 \begin{cases}
-W(weight)=\begin{pmatrix}
+W(\textrm{weight})=\begin{pmatrix}
 w_{11} & w_{12} & \cdots w_{1n}\\
 w_{21} & w_{22} & \cdots w_{2n}\\
 \vdots && \vdots\\
 w_{m1} & w_{m2} & \cdots w_{mn}\\
 \end{pmatrix}\\[5ex]
 
-x(input)=\begin{pmatrix}
+x(\textrm{input})=\begin{pmatrix}
 x_1\\
 x_2\\
 \vdots\\
 x_n
 \end{pmatrix}
 \
-b(bias)=\begin{pmatrix}
+b(\textrm{bias})=\begin{pmatrix}
 b_1\\
 b_2\\
 \vdots\\
@@ -207,18 +207,18 @@ $$
 输出层结果可以表示为：
 $$
 \begin{cases}
-S(softmax\ layer) = Softmax(W_2 \cdot (ReLU(W_1 \cdot x + b_1) + b_2) \\[2ex]
-Loss = -ln(\frac{e^{S_i-t}}{\Sigma_{i=0}^{n}e^{S_i-t}}|i = Lable), \ N=1 \\[2ex]
-t=max\{{S_i}\}
+S(\textrm{softmax layer}) = \textrm{Softmax}(W_2 \cdot (\textrm{ReLU}(W_1 \cdot x + b_1) + b_2) \\[2ex]
+\textrm{Loss} = -\ln(\frac{e^{S_i-t}}{\Sigma_{i=0}^{n}e^{S_i-t}}|i = \textrm{Label}), \ N=1 \\[2ex]
+t=\max\{{S_i}\}
 \end{cases}
 $$
 计算每层输出对于输入的梯度：
 $$
 \begin{cases}
-\nabla_S Loss = 
+\nabla_S \textrm{Loss} = 
 \begin{pmatrix}
-\frac{\partial Loss}{\partial S0}\
-\frac{\partial Loss}{\partial S1}
+\frac{\partial \textrm{Loss}}{\partial S0}\
+\frac{\partial \textrm{Loss}}{\partial S1}
 \end{pmatrix}
 =
 \begin{pmatrix}
@@ -240,17 +240,17 @@ $$
 \end{pmatrix}
 \\[2em]
 
-\nabla_{ReLU} L2 = 
+\nabla_{\textrm{ReLU}} L2 = 
 \begin{pmatrix}
-\frac{\partial L2_1}{\partial ReLU_1}\
-\frac{\partial L2_1}{\partial ReLU_2}\
-\frac{\partial L2_1}{\partial ReLU_3}\\
-\frac{\partial L2_2}{\partial ReLU_1}\
-\frac{\partial L2_2}{\partial ReLU_2}\
-\frac{\partial L2_2}{\partial ReLU_3}
+\frac{\partial L2_1}{\partial \textrm{ReLU}_1}\
+\frac{\partial L2_1}{\partial \textrm{ReLU}_2}\
+\frac{\partial L2_1}{\partial \textrm{ReLU}_3}\\
+\frac{\partial L2_2}{\partial \textrm{ReLU}_1}\
+\frac{\partial L2_2}{\partial \textrm{ReLU}_2}\
+\frac{\partial L2_2}{\partial \textrm{ReLU}_3}
 \end{pmatrix} \\[2em]
 
-\nabla_{L_{1}} ReLU =
+\nabla_{L_{1}} \textrm{ReLU} =
 \begin{pmatrix}
 1 \ 1 \ 1
 \end{pmatrix}
@@ -261,7 +261,7 @@ $$
 
 由链式法则：
 $$
-\frac{\partial Loss}{\partial LP_{ij}} = \frac{\partial Loss}{\partial L_i} \cdots \frac{\partial L_j}{\partial LP_{ij}}
+\frac{\partial \textrm{Loss}}{\partial LP_{ij}} = \frac{\partial \textrm{Loss}}{\partial L_i} \cdots \frac{\partial L_j}{\partial LP_{ij}}
 $$
 
 这样可以得到偏差对于每层输入的梯度表达式
@@ -269,7 +269,7 @@ $$
 #### (2). 更新参数
 
 $$
-LP_{ij}^{new} = LP_{ij} - \eta \cdot \frac{\partial Loss}{\partial LP_{ij}}
+LP_{ij}^{\textrm{new}} = LP_{ij} - \eta \cdot \frac{\partial \textrm{Loss}}{\partial LP_{ij}}
 $$
 
 其中 $\eta$ 为 学习率
@@ -330,13 +330,15 @@ AlexNet 中 Dropout 用在两个全连接层中。
 
 ### 2. 实现思路
 
-   > “怕什么真理无穷，进一寸有一寸的欢喜。”                             --胡适
+   > “怕什么真理无穷，进一寸有一寸的欢喜。”
+   >
+   > ——胡适
 
 #### (1). 简化结构
 
 我们的目标是实现一个基础的卷积神经网络，其结构如下：
 
-输入$\rightarrow$  卷积层1 $\rightarrow^{ReLU }$ 池化层1 $\rightarrow$ 全连接层1 $\rightarrow^{Softmax}$ 输出
+输入 $\rightarrow$  卷积层1 $\xrightarrow{\textrm{ReLU}}$ 池化层1 $\rightarrow$ 全连接层1 $\xrightarrow{\textrm{Softmax}}$ 输出
 
 ![](files/alexnet/1.jpg)
 
@@ -344,15 +346,15 @@ AlexNet 中 Dropout 用在两个全连接层中。
 
      采用均方误差函数 (Mean Square Error)
      $$
-     f_{Loss}=\frac {\sum_{i=1}^N(1-S_i|_{i=label})^2} N
+     f_{\textrm{Loss}}=\frac {\sum_{i=1}^N(1-S_i|_{i=\textrm{label}})^2} N
      $$
-     其中N是一组训练样本 (batch) 的大小。
+     其中 N 是一组训练样本 (batch) 的大小。
 
    + Softmax
 
      如前所述，使用 2 代替公式中的 $e$
      $$
-     Softmax^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
+     \textrm{Softmax}^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
      $$
      则
      $$
@@ -368,8 +370,8 @@ AlexNet 中 Dropout 用在两个全连接层中。
   ![](files/alexnet/2_.jpg)
   $$
   \begin{align}
-  \frac {\part f_{Loss}} {\part \vec W} & =[\frac {\part f_{Loss}} {\part   W_{11}},\frac {\part f_{Loss}} {\part   W_{12}},\frac {\part f_{Loss}} {\part   W_{21}},\frac {\part f_{Loss}} {\part   W_{22}}]\\
-  & =\frac {\part  f_{Loss}} {\part \vec S} \frac {\part \vec S} {\part \vec W}\\
+  \frac {\part f_{\textrm{Loss}}} {\part \vec W} & =[\frac {\part f_{\textrm{Loss}}} {\part   W_{11}},\frac {\part f_{\textrm{Loss}}} {\part   W_{12}},\frac {\part f_{\textrm{Loss}}} {\part   W_{21}},\frac {\part f_{\textrm{Loss}}} {\part   W_{22}}]\\
+  & =\frac {\part  f_{\textrm{Loss}}} {\part \vec S} \frac {\part \vec S} {\part \vec W}\\
   & =\frac 2 N \times[n_1\frac {d(1-S_1)} {dS_1},n_2\frac {d(1-S_2)} {dS_2}]\left[ 
   \begin{array}{c}
   {\frac {\part S_1} {\part W_{11}}}& {\frac {\part S_1} {\part W_{12}}} &
@@ -383,13 +385,13 @@ AlexNet 中 Dropout 用在两个全连接层中。
   
   \end{align}
   $$
-  采用差分方式代替偏导。并将各参数放大$2^{7}=128$倍以提高精度。
+  采用差分方式代替偏导。并将各参数放大 $2^{7}=128$ 倍以提高精度。
   $$
   \frac {\part S_1} {\part W_{11}}=\frac {S_1(W_{11})-S_1(W_{11}-\Delta W_{11})} {W_{11}-\Delta W_{11}}
   $$
   然后利用梯度下降公式更新参数：
   $$
-  W^{'}= W-\eta\times\frac {\partial f_{Loss}} {\partial W}
+  W^{'}= W-\eta\times\frac {\partial f_{\textrm{Loss}}} {\partial W}
   $$
 
 #### (2). Hardware Offload

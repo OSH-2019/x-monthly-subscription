@@ -209,7 +209,7 @@ $$
 \begin{cases}
 S(\textrm{softmax layer}) = \textrm{Softmax}(W_2 \cdot (\textrm{ReLU}(W_1 \cdot x + b_1) + b_2) \\[2ex]
 \textrm{Loss} = -\ln(\frac{e^{S_i-t}}{\Sigma_{i=0}^{n}e^{S_i-t}}|i = \textrm{Label}), \ N=1 \\[2ex]
-t=\max\{{S_i}\}
+t=\max\{ {S_i}\}
 \end{cases}
 $$
 计算每层输出对于输入的梯度：
@@ -358,7 +358,7 @@ AlexNet 中 Dropout 用在两个全连接层中。
      $$
      则
      $$
-     S_i=\frac {2^{{W^3_{1i}}L_{21}+{W^3_{2i}}L_{22}+b_{3i}}} {\Sigma_{i=1}^2 {2^{{W^3_{1i}}L_{21}+{W^3_{2i}}L_{22}+b_{3i}}}}
+     S_i=\frac {2^{ {W^3_{1i}}L_{21}+{W^3_{2i}}L_{22}+b_{3i}}} {\Sigma_{i=1}^2 {2^{ {W^3_{1i}}L_{21}+{W^3_{2i}}L_{22}+b_{3i}}}}
      $$
 
 + 训练方法
@@ -382,7 +382,7 @@ AlexNet 中 Dropout 用在两个全连接层中。
   {\frac {\part S_2} {\part W_{22}}}
   \end{array}
   \right]\\
-  
+
   \end{align}
   $$
   采用差分方式代替偏导。并将各参数放大 $2^{7}=128$ 倍以提高精度。
@@ -486,7 +486,7 @@ int Argmax(int x[],int n){
 int main(){
     //一张图片
     __u8 image[8][8]; 
-    
+
     /* input image */
     //偏置，是不需要训练（？）的参数,先设置为0.1
     __u8 Bias[4][4]={0.1,...}; 
@@ -495,7 +495,7 @@ int main(){
     //卷积核初始化，可以全赋值为1
     __u8 filter[5][5]= random_initial();
     __u8 FCL_filter1,...9[2][2]= random_initial();
-    
+
     //若对数字识别：result=0,1,2,...,9
     //搭建神经网络：
     int result=Argmax(
@@ -504,17 +504,17 @@ int main(){
         Pooling(ReLU(Convolution(image,filter)+Bias,4))
     	FCL_filter0,...,FCL_filter9)),10
         );
-    
+
     /*训练：进行验证，误差反向传播，使用BP算法训练参数 
-    
+
     //误差可以采用均方误差（交叉熵要用log，算了）
     //每训练一组（batch），一组n张图，计算一次loss，然后用BP算法调参
     double loss=(求和(result-true_value)*(result-true_value))/n
-       
+
     //BP 算法，需事先把偏导式写出
     //这里要调整的参数有：卷积核5x5=25 + FCL卷积核 10x2x2=40 =65个参数
     wi-=eta*(A*wi+B*wj+C*wk+...);  
-    
+
     printf("Pridiction is %d",result);
 }
 ```

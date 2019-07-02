@@ -7,4 +7,5 @@
 !bpf*.o
 
 # jekyll
+Gemfile.lock
 _site

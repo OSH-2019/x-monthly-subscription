@@ -134,7 +134,7 @@ $$
 \begin{cases}
 S(softmax\ layer) = Softmax(W_2 \cdot (ReLU(W_1 \cdot x + b_1) + b_2) \\[2ex]
 Loss = -ln(\frac{e^{S_i-t}}{\Sigma_{i=0}^{n}e^{S_i-t}}|i = Lable), \ N=1 \\[2ex]
-t=max\{{S_i}\}
+t=max\{ {S_i}\}
 \end{cases}
 $$
 
@@ -298,7 +298,7 @@ int Argmax(int x[],int n){
 int main(){
     //一张图片
     __u8 image[8][8]; 
-    
+
     /* input image */
     //偏置，是不需要训练（？）的参数,先设置为0.1
     __u8 Bias[4][4]={0.1,...}; 
@@ -307,7 +307,7 @@ int main(){
     //卷积核初始化，可以全赋值为1
     __u8 filter[5][5]= random_initial();
     __u8 FCL_filter1,...9[2][2]= random_initial();
-    
+
     //若对数字识别：result=0,1,2,...,9
     //搭建神经网络：
     int result=Argmax(
@@ -316,18 +316,18 @@ int main(){
         Pooling(ReLU(Convolution(image,filter)+Bias,4))
     	FCL_filter0,...,FCL_filter9)),10
         );
-    
+
     /*训练：进行验证，误差反向传播，使用BP算法训练参数 
       （这里可能很难实现，看需求，需要进一步调研）*/
-    
+
     //误差可以采用均方误差（交叉熵要用log，算了）
     //每训练一组（batch），一组n张图，计算一次loss，然后用BP算法调参
     double loss=(求和(result-true_value)*(result-true_value))/n
-       
+
     //BP 算法，我们得事先把偏导式子都算好
     //这里要调的参有：卷积核5x5=25 + FCL卷积核 10x2x2=40 =65个参数
     wi-=eta*(A*wi+B*wj+C*wk+...);  
-    
+
     printf("Pridiction is %d",result);
 }
 ```

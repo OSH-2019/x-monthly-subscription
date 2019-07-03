@@ -232,7 +232,7 @@ CH_DT8_CHUNK:
 	w8 = w9
 ABS_DT8:
 	w4 = 0
-	if r8 < 102 goto LD_DT9
+	if r8 < 1638 goto LD_DT9
 	w4 = 1
 LD_DT9:
 	r9 = *(u64 *)(r1 + 130)	# data[9]
@@ -261,7 +261,7 @@ CH_DT9_CHUNK:
 	w9 -= w3
 	w7 = w9
 ABS_DT9:
-	if r7 < 102 goto LD_DT10
+	if r7 < 1638 goto LD_DT10
 	w4 += 1
 LD_DT10:
 	r8 = *(u64 *)(r1 + 138)	# data[10]
@@ -290,7 +290,7 @@ CH_DT10_CHUNK:
 	w8 -= w3
 	w9 = w8
 ABS_DT10:
-	if r9 < 102 goto LD_DT11
+	if r9 < 1638 goto LD_DT11
 	w4 +=1
 LD_DT11:
 	r7 = *(u64 *)(r1 + 146)	# data[11]
@@ -319,7 +319,7 @@ CH_DT11_CHUNK:
 	w7 -= w3
 	w8 = w7
 ABS_DT11:
-	if r8 < 102 goto LD_DT12
+	if r8 < 1638 goto LD_DT12
 	w4 += 1
 LD_DT12:
 	r9 = *(u64 *)(r1 + 154)	# data[12]
@@ -348,7 +348,7 @@ CH_DT12_CHUNK:
 	w9 -= w3
 	w7 = w9
 ABS_DT12:
-	if r7 < 102 goto LD_DT13
+	if r7 < 1638 goto LD_DT13
 	w4 += 1
 LD_DT13:
 	r8 = *(u64 *)(r1 + 162)	# data[13]
@@ -377,7 +377,7 @@ CH_DT13_CHUNK:
 	w8 -= w3
 	w9 = w8
 ABS_DT13:
-	if r9 < 102 goto LD_DT14
+	if r9 < 1638 goto LD_DT14
 	w4 +=1
 LD_DT14:
 	r7 = *(u64 *)(r1 + 170)	# data[14]
@@ -406,7 +406,7 @@ CH_DT14_CHUNK:
 	w7 -= w3
 	w9 = w7
 ABS_DT14:
-	if r9 < 102 goto LD_DT15
+	if r9 < 1638 goto LD_DT15
 	w4 += 1
 LD_DT15:
 	r8 = *(u64 *)(r1 + 178)	# data[15]
@@ -435,10 +435,10 @@ CH_DT15_CHUNK:
 	w8 -= w3
 	w7 = w8
 ABS_DT15:
-	if r7 < 102 goto JUDGE
+	if r7 < 1638 goto JUDGE
 	w4 += 1
 JUDGE:
-	r4 *= 10404
+	r4 *= 2684191
 	r2 <<= 3
 	r3 = 1
 	if r4 > r2 goto JIEGUO

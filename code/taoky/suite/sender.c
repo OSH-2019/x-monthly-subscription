@@ -55,7 +55,7 @@ void prepare_file(char *filename, int raw) {
             exit(-1);
         }
         while (fscanf(f, "%lf", &d) == 1) {
-            unsigned int this_d_nraw = (unsigned int)(d * 1024);
+            unsigned int this_d_nraw = (unsigned int)(d * 16384);
             if (!raw)
                 data_append(&this_d_nraw, 0);
             else
@@ -63,7 +63,7 @@ void prepare_file(char *filename, int raw) {
         }
     } else {
         while (scanf("%lf", &d) == 1) {
-            unsigned int this_d_nraw = (unsigned int)(d * 1024);
+            unsigned int this_d_nraw = (unsigned int)(d * 16384);
             if (!raw)
                 data_append(&this_d_nraw, 0);
             else

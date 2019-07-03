@@ -50,30 +50,31 @@ int process_packet(struct xdp_md *ctx)
     } else {
         if (raw->tag != 0) return XDP_PASS;
         //for first 16 data (type __u32), calculate mean and var
-        __u32 mean=(__u32)0;
+        __u64 mean=(__u64)0;
         __u64 var=(__u64)0;
-        mean+=raw->data[0];var+=raw->data[0]*raw->data[0];
-        mean+=raw->data[1];var+=raw->data[1]*raw->data[1];
-        mean+=raw->data[2];var+=raw->data[2]*raw->data[2];
-        mean+=raw->data[3];var+=raw->data[3]*raw->data[3];
-        mean+=raw->data[4];var+=raw->data[4]*raw->data[4];
-        mean+=raw->data[5];var+=raw->data[5]*raw->data[5];
-        mean+=raw->data[6];var+=raw->data[6]*raw->data[6];
-        mean+=raw->data[7];var+=raw->data[7]*raw->data[7];
+        mean+=raw->data[0];var+=(__u64)raw->data[0]*raw->data[0];
+        mean+=raw->data[1];var+=(__u64)raw->data[1]*raw->data[1];
+        mean+=raw->data[2];var+=(__u64)raw->data[2]*raw->data[2];
+        mean+=raw->data[3];var+=(__u64)raw->data[3]*raw->data[3];
+        mean+=raw->data[4];var+=(__u64)raw->data[4]*raw->data[4];
+        mean+=raw->data[5];var+=(__u64)raw->data[5]*raw->data[5];
+        mean+=raw->data[6];var+=(__u64)raw->data[6]*raw->data[6];
+        mean+=raw->data[7];var+=(__u64)raw->data[7]*raw->data[7];
         mean>>=3;var>>=3;var-=mean*mean;
-        const __u32 e=0x66;
-        const __u16 e2=0x28A4;
+        __u32 mean2 = (__u32)mean;
+        const __u32 e=1638;
+        const __u64 e2=2684191;
         __u16 tot=(__u32)0;
 
-        tot+=( raw->data[8]>=mean ? (raw->data[8]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[8]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[9]>=mean ? (raw->data[9]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[9]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[10]>=mean ? (raw->data[10]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[10]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[11]>=mean ? (raw->data[11]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[11]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[12]>=mean ? (raw->data[12]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[12]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[13]>=mean ? (raw->data[13]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[13]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[14]>=mean ? (raw->data[14]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[14]>=e ? (__u16)1 : (__u16)0) );
-        tot+=( raw->data[15]>=mean ? (raw->data[15]-mean>=e ? (__u16)1 : (__u16)0) : (mean-raw->data[15]>=e ? (__u16)1 : (__u16)0) );
-        if ((__u64)((__u32)tot*e2) > (var<<3)){
+        tot+=( raw->data[8]>=mean2 ? (raw->data[8]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[8]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[9]>=mean2 ? (raw->data[9]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[9]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[10]>=mean2 ? (raw->data[10]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[10]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[11]>=mean2 ? (raw->data[11]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[11]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[12]>=mean2 ? (raw->data[12]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[12]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[13]>=mean2 ? (raw->data[13]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[13]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[14]>=mean2 ? (raw->data[14]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[14]>=e ? (__u16)1 : (__u16)0) );
+        tot+=( raw->data[15]>=mean2 ? (raw->data[15]-mean2>=e ? (__u16)1 : (__u16)0) : (mean2-raw->data[15]>=e ? (__u16)1 : (__u16)0) );
+        if (tot*e2 > (var<<3)){
             raw->tag = (__u64)1;// hua fen！
         }else{
             raw->tag = (__u64)2;// no hua fen

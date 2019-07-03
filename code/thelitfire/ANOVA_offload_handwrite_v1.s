@@ -61,7 +61,7 @@ process_packet:                         # @process_packet
 	w0 = w5
 ABS_DT8:
 	w4 = 0
-	if r0 < 102 goto LD_DT9
+	if r0 < 1638 goto LD_DT9
 	w4 = 1
 LD_DT9:
 	r6 = *(u32 *)(r1 + 94)	# data[9]
@@ -71,7 +71,7 @@ LD_DT9:
 	w6 -= w3
 	w7 = w6
 ABS_DT9:
-	if r7 < 102 goto LD_DT10
+	if r7 < 1638 goto LD_DT10
 	w4 += 1
 LD_DT10:
 	r8 = *(u32 *)(r1 + 98)	# data[10]
@@ -81,7 +81,7 @@ LD_DT10:
 	w8 -= w3
 	w9 = w8
 ABS_DT10:
-	if r9 < 102 goto LD_DT11
+	if r9 < 1638 goto LD_DT11
 	w4 +=1
 LD_DT11:
 	r5 = *(u32 *)(r1 + 102)	# data[11]
@@ -91,7 +91,7 @@ LD_DT11:
 	w5 -= w3
 	w0 = w5
 ABS_DT11:
-	if r0 < 102 goto LD_DT12
+	if r0 < 1638 goto LD_DT12
 	w4 += 1
 LD_DT12:
 	r6 = *(u32 *)(r1 + 106)	# data[12]
@@ -101,7 +101,7 @@ LD_DT12:
 	w6 -= w3
 	w7 = w6
 ABS_DT12:
-	if r7 < 102 goto LD_DT13
+	if r7 < 1638 goto LD_DT13
 	w4 += 1
 LD_DT13:
 	r8 = *(u32 *)(r1 + 110)	# data[13]
@@ -111,7 +111,7 @@ LD_DT13:
 	w8 -= w3
 	w9 = w8
 ABS_DT13:
-	if r9 < 102 goto LD_DT14
+	if r9 < 1638 goto LD_DT14
 	w4 +=1
 LD_DT14:
 	r5 = *(u32 *)(r1 + 114)	# data[14]
@@ -121,7 +121,7 @@ LD_DT14:
 	w5 -= w3
 	w0 = w5
 ABS_DT14:
-	if r0 < 102 goto LD_DT15
+	if r0 < 1638 goto LD_DT15
 	w4 += 1
 LD_DT15:
 	r6 = *(u32 *)(r1 + 118)	# data[15]
@@ -131,10 +131,10 @@ LD_DT15:
 	w6 -= w3
 	w7 = w6
 ABS_DT15:
-	if r7 < 102 goto JUDGE
+	if r7 < 1638 goto JUDGE
 	w4 += 1
 JUDGE:
-	r4 *= 10404
+	r4 *= 2684191
 	r2 <<= 3
 	r3 = 1
 	if r4 > r2 goto JIEGUO

@@ -60,21 +60,22 @@ int main(int argc, char** argv) {
                 printf("\n");
             }
             if (!raw) {
-                unsigned int mean = 0;
+                unsigned long long mean = 0;
                 unsigned long long var = 0;
                 for (int i = 0; i < 8; i++) {
                     mean += packet->data[i];
                     var += (unsigned long long)packet->data[i] * packet->data[i];
                 }
                 mean >>= 3; var >>= 3;
-                var -= (unsigned long long)mean * mean;
-                const unsigned int e = 0x66;
-                const unsigned int e2 = 0x28a4;
+                var -= mean * mean;
+                unsigned int mean2 = (unsigned int) mean;
+                const unsigned int e = 0x666;
+                const unsigned int e2 = 2684191;
                 unsigned int tot = 0;
                 for (int i = 8; i < 16; ++i) {
-                    tot += packet->data[i] >= mean ? (
-                            packet->data[i]-mean >= e ? 1u : 0u) : (
-                                mean-packet->data[i] >= e ? 1u : 0u);
+                    tot += packet->data[i] >= mean2 ? (
+                            packet->data[i] - mean2 >= e ? 1u : 0u) : (
+                                mean2 - packet->data[i] >= e ? 1u : 0u);
                 }
                 bool flag = false;
                 if ((unsigned long long)tot * e2 > (var << 3)) 
@@ -85,24 +86,22 @@ int main(int argc, char** argv) {
                     puts("AAAAA!");
                 }
             } else {
-                unsigned int mean = 0;
-                unsigned long long var = 0;
+                double mean = 0, var = 0;
                 for (int i = 0; i < 8; i++) {
-                    mean += ((unsigned int)(packet->data_raw[i]*1024));
-                    var += (unsigned long long)((unsigned int)(packet->data_raw[i]*1024)) * ((unsigned int)(packet->data_raw[i]*1024));
+                    mean += packet->data_raw[i];
+                    var += packet->data_raw[i] * packet->data_raw[i];
                 }
-                mean >>= 3; var >>= 3;
-                var -= (unsigned long long)mean * mean;
-                const unsigned int e = 0x66;
-                const unsigned int e2 = 0x28a4;
+                mean /= 8; var /= 8;
+                var -= mean * mean;
+                const double e = 0.1;
                 unsigned int tot = 0;
                 for (int i = 8; i < 16; ++i) {
-                    tot += ((unsigned int)(packet->data_raw[i]*1024)) >= mean ? (
-                            ((unsigned int)(packet->data_raw[i]*1024))-mean >= e ? 1u : 0u) : (
-                                mean-((unsigned int)(packet->data_raw[i]*1024)) >= e ? 1u : 0u);
+                    tot += packet->data_raw[i] >= mean ? (
+                            (packet->data_raw[i] - mean >= e ? 1u : 0u) : (
+                                mean - packet->data_raw[i] >= e ? 1u : 0u);
                 }
                 bool flag = false;
-                if ((unsigned long long)tot * e2 > (var << 3)) 
+                if (tot * e * e > (var * 8.)) 
                     flag = true;
                 if ((flag && packet->tag == 1ull) || (!flag && packet->tag == 2ull)) {
                     puts("OK!");

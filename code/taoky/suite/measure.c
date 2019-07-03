@@ -27,7 +27,7 @@ __inline__ uint64_t time_cnt(void) {
     return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 }
 
-__inline uint64_t measure(int sock_send, int sock_recv, byte *send_buf, struct sockaddr_in target_addr, struct msghdr *msg, byte *recv_buf) {
+__inline__ uint64_t measure(int sock_send, int sock_recv, byte *send_buf, struct sockaddr_in target_addr, struct msghdr *msg, byte *recv_buf) {
     int received;
     uint64_t t1 = time_cnt();
     uint64_t t2;

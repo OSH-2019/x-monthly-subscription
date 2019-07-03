@@ -7,22 +7,30 @@
 struct packet {
     unsigned long magic;
     unsigned long tag;
-    unsigned int data[16];
+    union {
+        unsigned int data[16];
+        double data_raw[16];
+    };
 };
 
 int main(int argc, char** argv) {
     int debug = 0;
+    int raw = 0;
     require_root();
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-        fprintf(stderr, "Usage: %s [RECV ITH] [DEBUG (0/1/2)]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [RECV ITH] [DEBUG (0/1/2)] [RAW (0/1)]\n", argv[0]);
         exit(-1);
     }
 
     char recv_iface[16] = TARGET_IFACE;
     if (argc >= 2) {
         strcpy(recv_iface, argv[1]);
-        if (argc >= 3)
+        if (argc >= 3) {
             debug = atoi(argv[2]);
+            if (argc >= 4) {
+                raw = atoi(argv[3]);
+            }
+        }
     }
     int sock_recv = receiver_prepare(recv_iface);
     size_t bufsize = 8192;
@@ -44,33 +52,38 @@ int main(int argc, char** argv) {
                 printf("magic: %lu\n", packet->magic);
                 assert(packet->magic == 0x216C7174786A7A21UL);
                 for (int i = 0; i < 16; i++) {
-                    printf("%u ", packet->data[i]);
+                    if (!raw)
+                        printf("%u ", packet->data[i]);
+                    else
+                        printf("%lf ", packet->data_raw[i]);
                 }
                 printf("\n");
             }
-            unsigned int mean = 0;
-            unsigned long long var = 0;
-            for (int i = 0; i < 8; i++) {
-                mean += packet->data[i];
-                var += (unsigned long long)packet->data[i] * packet->data[i];
-            }
-            mean >>= 3; var >>= 3;
-            var -= (unsigned long long)mean * mean;
-            const unsigned int e = 0x66;
-            const unsigned int e2 = 0x28a4;
-            unsigned int tot = 0;
-            for (int i = 8; i < 16; ++i) {
-                tot += packet->data[i] >= mean ? (
-                        packet->data[i]-mean >= e ? 1u : 0u) : (
-                            mean-packet->data[i] >= e ? 1u : 0u);
-            }
-            bool flag = false;
-            if ((unsigned long long)tot * e2 > (var << 3)) 
-                flag = true;
-            if ((flag && packet->tag == 1ull) || (!flag && packet->tag == 2ull)) {
-                puts("OK!");
-            } else {
-                puts("AAAAA!");
+            if (!raw) {
+                unsigned int mean = 0;
+                unsigned long long var = 0;
+                for (int i = 0; i < 8; i++) {
+                    mean += packet->data[i];
+                    var += (unsigned long long)packet->data[i] * packet->data[i];
+                }
+                mean >>= 3; var >>= 3;
+                var -= (unsigned long long)mean * mean;
+                const unsigned int e = 0x66;
+                const unsigned int e2 = 0x28a4;
+                unsigned int tot = 0;
+                for (int i = 8; i < 16; ++i) {
+                    tot += packet->data[i] >= mean ? (
+                            packet->data[i]-mean >= e ? 1u : 0u) : (
+                                mean-packet->data[i] >= e ? 1u : 0u);
+                }
+                bool flag = false;
+                if ((unsigned long long)tot * e2 > (var << 3)) 
+                    flag = true;
+                if ((flag && packet->tag == 1ull) || (!flag && packet->tag == 2ull)) {
+                    puts("OK!");
+                } else {
+                    puts("AAAAA!");
+                }
             }
         }
     }

@@ -10,8 +10,8 @@
 // 63    | 62            52 | 51     0 |
 // sign  | 11 bits exponent | mantissa |
 // ull x
-// 63               28           13         0
-// 0 ......        2^15         2^0       2^-13
+// 63               29           14         0
+// 0 ......        2^15         2^0       2^-14
 // 
 // TEST
 // printf("%llx\n", *((__u64*)&data));
@@ -26,8 +26,8 @@ __u32 double_to_u32(__u64 data){
     if (data==(__u64)0) x=(__u64)0;
     exponent=(__u32)(data >> 52)-(__u32)1023;
     x=data&(__u64)0x000FFFFFFFFFFFFF|(__u64)0x0010000000000000;
-    if ((__u32)39-exponent>(__u32)0) x>>=(__u32)39-exponent;
-    else x<<=exponent-(__u32)39;
+    if ((__u32)38-exponent>(__u32)0) x>>=(__u32)38-exponent;
+    else x<<=exponent-(__u32)38;
     return (__u32)x;
 }
 
@@ -42,7 +42,7 @@ int main(void){
 		__u64 b;fread(&b,sizeof(__u64),(size_t)1,stdin);
 		__u32 x=double_to_u32(b);
 		fclose(stdin); 
-		if ((__u32)(a*8192.0) != x) return 255;
+		if ((__u32)(a*16384.0) != x) return 255;
 	}
 	return 0;
 }

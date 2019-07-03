@@ -23,7 +23,7 @@ int main(void) {
 		mean2 /= 8; var2 /= 8;
 		var2 -= mean2 * mean2;
 		unsigned long long tot1 = 0, tot2 = 0;
-		const unsigned long long e1 = 0xccc;
+		const unsigned long long e1 = 0xccd;
 		double e2 = 0.1;
 		unsigned long long abs1;
 		double abs2;

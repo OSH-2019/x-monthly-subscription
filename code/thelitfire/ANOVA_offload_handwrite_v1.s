@@ -3,6 +3,9 @@
 	.globl	process_packet          # -- Begin function process_packet
 	.p2align	3
 process_packet:                         # @process_packet
+#   This is the handwriting version of ANOVA 1
+#   NO VERIFIER ERROR
+
 	r2 = *(u32 *)(r1 + 4)
 	r1 = *(u32 *)(r1 + 0)	# r1: data package pointer
 	r3 = r1
@@ -16,32 +19,32 @@ process_packet:                         # @process_packet
 	r4 = *(u32 *)(r1 + 58)	# data[0]
 	r2 = *(u32 *)(r1 + 62)	# data[1]
 	w3 = w2					
-	w3 += w4				# w3: mean
+	r3 += r4				# w3: mean
 	r2 *= r2
 	r4 *= r4
 	r2 += r4				# r2: var
 	r5 = *(u32 *)(r1 + 66)	# data[2]
-	w3 += w5
+	r3 += r5
 	r5 *= r5
 	r2 += r5
 	r4 = *(u32 *)(r1 + 70)	# data[3]
-	w3 += w4
+	r3 += r4
 	r4 *= r4
 	r2 += r4
 	r6 = *(u32 *)(r1 + 74)	# data[4]
-	w3 += w6
+	r3 += r6
 	r6 *= r6
 	r2 += r6
 	r7 = *(u32 *)(r1 + 78)	# data[5]
-	w3 += w7
+	r3 += r7
 	r7 *= r7
 	r2 += r7
 	r8 = *(u32 *)(r1 + 82)	# data[6]
-	w3 += w8
+	r3 += r8
 	r8 *= r8
 	r2 += r8
 	r9 = *(u32 *)(r1 + 86)	# data[7]
-	w3 += w9
+	r3 += r9
 	r9 *= r9
 	r2 += r9
 	r3 >>= 3	# w3: mean

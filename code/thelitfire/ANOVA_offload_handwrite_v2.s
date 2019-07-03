@@ -32,7 +32,6 @@ process_packet:                         # @process_packet
     goto CH_DT0_CHUNK
 CH_DT0_B:
     w5 -= 42
-    w5 &= 31
     r4 <<= r5
 CH_DT0_CHUNK:
     r4 <<= 32
@@ -53,7 +52,6 @@ CH_DT0_CHUNK:
     goto CH_DT1_CHUNK
 CH_DT1_B:
     w5 -= 42
-    w5 &= 31
     r2 <<= r5
 CH_DT1_CHUNK:
     r2 <<= 32
@@ -79,7 +77,6 @@ CH_DT1_CHUNK:
     goto CH_DT2_CHUNK
 CH_DT2_B:
     w5 -= 42
-    w5 &= 31
     r9 <<= r5
 CH_DT2_CHUNK:
     r9 <<= 32
@@ -103,7 +100,6 @@ CH_DT2_CHUNK:
     goto CH_DT3_CHUNK
 CH_DT3_B:
     w5 -= 42
-    w5 &= 31
     r4 <<= r5
 CH_DT3_CHUNK:
     r4 <<= 32
@@ -127,7 +123,6 @@ CH_DT3_CHUNK:
     goto CH_DT4_CHUNK
 CH_DT4_B:
     w5 -= 42
-    w5 &= 31
     r9 <<= r5
 CH_DT4_CHUNK:
     r9 <<= 32
@@ -151,7 +146,6 @@ CH_DT4_CHUNK:
     goto CH_DT5_CHUNK
 CH_DT5_B:
     w5 -= 42
-    w5 &= 31
     r7 <<= r5
 CH_DT5_CHUNK:
     r7 <<= 32
@@ -175,7 +169,6 @@ CH_DT5_CHUNK:
     goto CH_DT6_CHUNK
 CH_DT6_B:
     w5 -= 42
-    w5 &= 31
     r8 <<= r5
 CH_DT6_CHUNK:
     r8 <<= 32
@@ -199,7 +192,6 @@ CH_DT6_CHUNK:
     goto CH_DT7_CHUNK
 CH_DT7_B:
     w5 -= 42
-    w5 &= 31
     r9 <<= r5
 CH_DT7_CHUNK:
     r9 <<= 32
@@ -229,7 +221,6 @@ CH_DT7_CHUNK:
     goto CH_DT8_CHUNK
 CH_DT8_B:
     w5 -= 42
-    w5 &= 31
     r9 <<= r5
 CH_DT8_CHUNK:
     r9 <<= 32
@@ -260,7 +251,6 @@ LD_DT9:
     goto CH_DT9_CHUNK
 CH_DT9_B:
     w5 -= 42
-    w5 &= 31
     r9 <<= r5
 CH_DT9_CHUNK:
     r9 <<= 32
@@ -290,7 +280,6 @@ LD_DT10:
     goto CH_DT10_CHUNK
 CH_DT10_B:
     w5 -= 42
-    w5 &= 31
     r8 <<= r5
 CH_DT10_CHUNK:
     r8 <<= 32
@@ -320,7 +309,6 @@ LD_DT11:
     goto CH_DT11_CHUNK
 CH_DT11_B:
     w5 -= 42
-    w5 &= 31
     r7 <<= r5
 CH_DT11_CHUNK:
     r7 <<= 32
@@ -350,7 +338,6 @@ LD_DT12:
     goto CH_DT12_CHUNK
 CH_DT12_B:
     w5 -= 42
-    w5 &= 31
     r9 <<= r5
 CH_DT12_CHUNK:
     r9 <<= 32
@@ -380,7 +367,6 @@ LD_DT13:
     goto CH_DT13_CHUNK
 CH_DT13_B:
     w5 -= 42
-    w5 &= 31
     r8 <<= r5
 CH_DT13_CHUNK:
     r8 <<= 32
@@ -410,7 +396,6 @@ LD_DT14:
     goto CH_DT14_CHUNK
 CH_DT14_B:
     w5 -= 42
-    w5 &= 31
     r7 <<= r5
 CH_DT14_CHUNK:
     r7 <<= 32
@@ -440,7 +425,6 @@ LD_DT15:
     goto CH_DT15_CHUNK
 CH_DT15_B:
     w5 -= 42
-    w5 &= 31
     r8 <<= r5
 CH_DT15_CHUNK:
     r8 <<= 32

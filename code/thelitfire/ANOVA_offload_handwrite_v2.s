@@ -3,7 +3,7 @@
 	.globl	process_packet          # -- Begin function process_packet
 	.p2align	3
 process_packet:                         # @process_packet
-#   This is the handwriting version of ANOVA 1
+#   This is the handwriting version of ANOVA 2
 #   NO VERIFIER ERROR
 
 	r2 = *(u32 *)(r1 + 4)

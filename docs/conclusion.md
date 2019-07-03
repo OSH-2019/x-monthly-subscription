@@ -134,15 +134,22 @@ static __always_inline __u32 double_to_u32(__u64 data){
     else{
         exponent=(__u32)(data >> 52)-(__u32)1023;
     	x=data&(__u64)0x000FFFFFFFFFFFFF|(__u64)0x0010000000000000;
-    	if ((__u32)42-exponent>(__u32)0) x>>=(__u32)42-exponent;
-    	else x<<=exponent-(__u32)42;
+    	if ((__u32)39-exponent>(__u32)0) x>>=(__u32)39-exponent;
+    	else x<<=exponent-(__u32)39;
     }
     return (__u32)x;
 }
 ```
 
-代码原文请[参见仓库](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/censyu/double2u64.c)。
+代码原文请 [参见仓库](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/censyu/double2u64.c)。
 
 当然了，这种表示有其相当的局限性和不可移植性。但针对特定应用、特定场景做特定优化，本就是本小组设计程序、降低延迟的必经途径。
 
-如何表示浮点数已经确定，但谁来做这个转化？有两个选择：准备数据包的外部程序（运行在服务器 CPU 上的程序，以下不再解释）把原始浮点数直接打进数据包，由网卡内的 eBPF 程序来做这个转化；另一种是打包数据的外部程序把转化好的整数值打包进去，网卡内的 eBPF 程序直接去操作整数值。
+转化浮点数的方法已经可以确定，但谁来做这个转化？有两个选择：准备数据包的外部程序（运行在服务器 CPU 上的程序，以下不再解释）把原始浮点数直接打进数据包，由网卡内的 eBPF 程序来做这个转化；另一种是打包数据的外部程序把转化好的整数值打包进去，网卡内的 eBPF 程序直接去操作整数。两种做法都有其理由：前者可以使所有 “计算” 都包括在 eBPF 程序内，外部程序只做一些 eBPF 不可能做的事情（整合数据包和接收数据包并整理运算结果），更贴切本课题使用 eBPF 实现完整算法的主题；而后者认为转化数据自有格式也可以看作整合数据包的一部分过程，不是算法的核心运算，从 eBPF 中剔除之情有可原。
+
+本小组对两个方式都有所实现。前者的代码请参阅 [手写汇编 version 2](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v2.s) 和 [C 程序描述](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_v2.c)，后者的请参阅 [手写汇编 version 1](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v1.s) 和 [C 程序描述](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_v1.c) 。二者的本质是一样的，只是 version 2 相较 version 1 多了三百多行汇编指令，都是浮点数转整数的过程。
+
+#### eBPF 算法实现
+
+接下来以 version 1 （在外部程序完成整数化的版本）为主体叙述算法的 eBPF 实现过程。讲述直接使用 clang 等编译器获得汇编码、机器编译汇编如何不能被 verifier 通过、机器汇编能告诉我们什么、手写汇编并最终通过 verifier，这四个大的过程。
+

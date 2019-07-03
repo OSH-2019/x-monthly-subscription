@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
                 if (raw)
                     memcpy(send_buf + 16 + 8 * i, &data, sizeof data);
                 else {
-                    unsigned int data_int = (unsigned int)(data * 1024);
+                    unsigned int data_int = (unsigned int)(data * 16384);
                     memcpy(send_buf + 16 + 4 * i, &data_int, sizeof(data_int));
                 }
             }

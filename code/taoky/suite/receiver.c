@@ -85,7 +85,29 @@ int main(int argc, char** argv) {
                     puts("AAAAA!");
                 }
             } else {
-                // let's zjx
+                double mean = 0.;
+                double var = 0.;
+                for (int i = 0; i < 8; i++) {
+                    mean += packet->data_raw[i];
+                    var += packet->data_raw[i] * packet->data_raw[i];
+                }
+                mean /= 8; var /= 8;
+                var -= mean * mean;
+                const double e = 0.1;
+                unsigned int tot = 0;
+                for (int i = 8; i < 16; ++i) {
+                    tot += packet->data_raw[i] >= mean ? (
+                            packet->data_raw[i]-mean >= e ? 1u : 0u) : (
+                                mean-packet->data_raw[i] >= e ? 1u : 0u);
+                }
+                bool flag = false;
+                if (tot * e * e > (var * 8)) 
+                    flag = true;
+                if ((flag && packet->tag == 1ull) || (!flag && packet->tag == 2ull)) {
+                    puts("OK!");
+                } else {
+                    puts("AAAAA!");
+                }
             }
         }
     }

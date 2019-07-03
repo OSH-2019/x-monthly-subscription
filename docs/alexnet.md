@@ -19,9 +19,11 @@
 下图：神经元被抽象为分层的计算节点（也常被称为神经元）。
 
 每个神经元的输入数据被乘上权重 (weight)、加上偏置 (bias) 后进行计算，再经激活函数 (Activation function) 进行非线性变换后输出。
+
 $$
 \textrm{Output} = \textrm{Activation}(W·\vec X+\vec b)
 $$
+
 ![](files/alexnet/神经元2.png)
 
 下图：神经元之间的连接被抽象为层与层之间（节点与节点之间）计算数据的传递，网络的层数被称为深度。输入输出层外的节点层被称为隐藏层。
@@ -97,19 +99,21 @@ AlexNet 采用重叠卷积池化的方法，步长小于卷积核的尺寸。
 
 两个卷积层移动步长是4个像素，分成两组在两个 GPU 上计算。
 
-RuLU 后的像素层再经过池化运算，池化运算的尺寸为 3×3。
+ReLU 后的像素层再经过池化运算，池化运算的尺寸为 3×3。
 
 池化后的像素层再进行归一化处理，归一化运算的尺寸为 5×5，归一化后的像素规模不变，同样分成两组在两个 GPU 上计算。
 
 **卷积**
 
 在高等数学中，我们学过，函数 $f(x),g(x)$ 的卷积运算为
+
 $$
-f(x)*g(x)= \int_{-\infin}^{\infin} f(x-t)g(t)dt
+f(x)*g(x)= \int_{-\infty}^{\infty} f(x-t)g(t)dt
 $$
+
 其中 $g(x)$ 可以称为该卷积运算的卷积核 (kernel)。
 
-由于图像在计算机内部以矩阵形式存储，下面我们考虑卷积运算的矩阵形式。以下图为例，直观表示矩阵卷积的过程：$k*k$ 大小的卷积核矩阵与 $m*n$ 大小的输入矩阵进行对应位相乘并求和，得到的结果作为新矩阵中的一个元素。
+由于图像在计算机内部以矩阵形式存储，下面我们考虑卷积运算的矩阵形式。以下图为例，直观表示矩阵卷积的过程：$k \times k$ 大小的卷积核矩阵与 $m \times n$ 大小的输入矩阵进行对应位相乘并求和，得到的结果作为新矩阵中的一个元素。
 
 ![](files/alexnet/卷积.jpg)
 
@@ -123,7 +127,7 @@ $$
 
 池化有重叠池化 (overlapping pooling)、最大值池化 (max pooling) 等方式。
 
-以“最大值池化”方式为例，如下图，将一个 $4*4$ 大小的中间结果矩阵，通过对每个子矩阵取元素最大值，压缩为一个 $2*2$ 大小的矩阵进行后续运算。
+以“最大值池化”方式为例，如下图，将一个 $4 \times 4$ 大小的中间结果矩阵，通过对每个子矩阵取元素最大值，压缩为一个 $2 \times 2$ 大小的矩阵进行后续运算。
 
 ![](files/alexnet/pooling.png)
 
@@ -144,12 +148,15 @@ $$
 Softmax 被用于接收来自全连接层的输入，产生最后的结果（以图像分类问题为例，最终的结果是各个可能类别的概率）
 
 公式如下：
+
 $$
 \textrm{Softmax}(x_i)=\frac {e^{x_i}} {\Sigma_{j=0}^n e^{x_j}} \in [0,1]
 $$
-Softmax 函数的值域是 $[0,1]$，很容易想到，这正是输出结果 $label=x_i$ 的概率 $P(x_i)$。
 
-在我们小组的实现方案中，为了方便进行数据处理，我们将公式中的 $ e$ 替换为 2。这样幂次可以直接通过移位实现。
+Softmax 函数的值域是 $[0,1]$，很容易想到，这正是输出结果 $\textrm{label}=x_i$ 的概率 $P(x_i)$。
+
+在我们小组的实现方案中，为了方便进行数据处理，我们将公式中的 $e$ 替换为 2。这样幂次可以直接通过移位实现。
+
 $$
 \textrm{Softmax}^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
 $$
@@ -157,20 +164,23 @@ $$
 ### 5. 前向传播
 
 在两个全连接层，计算该层输出结果使用如下公式：
+
 $$
 L_{i+1} = W_iL_{i} + b_i
 $$
 
-对于 ReLIU 和 Softmax 层，函数作用在矩阵上的方式为作用在矩阵的每个元素上
+对于 ReLU 和 Softmax 层，函数作用在矩阵上的方式为作用在矩阵的每个元素上
 
 ### 6. 反向传播算法
 
 反向传播算法基于简单的梯度下降法。
 
 根据微积分知识我们易知函数梯度的逆方向是函数值下降最快的方向。因此，对需要调整的参数 $W$，若我们能够求出损失函数关于当前 $W$ 的偏导数值, 并人为设定基于该偏导数的梯度下降步长 $\eta$（称为学习率），可由下公式得到更新后的 $W$:
+
 $$
 W^{'}= W-\eta\times\frac {\partial f_{\textrm{Loss}}} {\partial W}
 $$
+
 梯度下降直观过程如下图。类似一步步走下山坡知道最低点（存在的问题是得到的目标点有可能是极小值点而非最小值点）
 
 ![](files/alexnet/梯度下降.png)
@@ -178,6 +188,7 @@ $$
 #### (1). 计算梯度
 
 输入数据以及在 L1、L2 两层的权重和偏置，用矩阵表示如下:
+
 $$
 \begin{cases}
 W(\textrm{weight})=\begin{pmatrix}
@@ -205,6 +216,7 @@ $$
 
 
 输出层结果可以表示为：
+
 $$
 \begin{cases}
 S(\textrm{softmax layer}) = \textrm{Softmax}(W_2 \cdot (\textrm{ReLU}(W_1 \cdot x + b_1) + b_2) \\[2ex]
@@ -212,7 +224,9 @@ S(\textrm{softmax layer}) = \textrm{Softmax}(W_2 \cdot (\textrm{ReLU}(W_1 \cdot 
 t=\max\{ {S_i}\}
 \end{cases}
 $$
+
 计算每层输出对于输入的梯度：
+
 $$
 \begin{cases}
 \nabla_S \textrm{Loss} = 
@@ -260,6 +274,7 @@ $$
 $$
 
 由链式法则：
+
 $$
 \frac{\partial \textrm{Loss}}{\partial LP_{ij}} = \frac{\partial \textrm{Loss}}{\partial L_i} \cdots \frac{\partial L_j}{\partial LP_{ij}}
 $$
@@ -291,9 +306,11 @@ AlexNet 共有 8 层，前 5 层为卷积（含池化）层，后 3 层为全连
 #### (2). 激活函数
 
 AlexNet 使用 ReLU 作为神经元的激活函数。
+
 $$
-ReLU(x)=max(x,0)
+\textrm{ReLU}(x)=\max(x,0)
 $$
+
 ![](files/alexnet/AlexnetRelu.png)
 
 #### (3). Dropout 层
@@ -345,18 +362,23 @@ AlexNet 中 Dropout 用在两个全连接层中。
    + 损失函数
 
      采用均方误差函数 (Mean Square Error)
+
      $$
      f_{\textrm{Loss}}=\frac {\sum_{i=1}^N(1-S_i|_{i=\textrm{label}})^2} N
      $$
+
      其中 N 是一组训练样本 (batch) 的大小。
 
    + Softmax
 
      如前所述，使用 2 代替公式中的 $e$
+
      $$
      \textrm{Softmax}^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
      $$
+
      则
+
      $$
      S_i=\frac {2^{ {W^3_{1i}}L_{21}+{W^3_{2i}}L_{22}+b_{3i}}} {\Sigma_{i=1}^2 {2^{ {W^3_{1i}}L_{21}+{W^3_{2i}}L_{22}+b_{3i}}}}
      $$
@@ -368,28 +390,33 @@ AlexNet 中 Dropout 用在两个全连接层中。
   以全连接层 2 为例：
 
   ![](files/alexnet/2_.jpg)
+
   $$
   \begin{align}
-  \frac {\part f_{\textrm{Loss}}} {\part \vec W} & =[\frac {\part f_{\textrm{Loss}}} {\part   W_{11}},\frac {\part f_{\textrm{Loss}}} {\part   W_{12}},\frac {\part f_{\textrm{Loss}}} {\part   W_{21}},\frac {\part f_{\textrm{Loss}}} {\part   W_{22}}]\\
-  & =\frac {\part  f_{\textrm{Loss}}} {\part \vec S} \frac {\part \vec S} {\part \vec W}\\
+  \frac {\partial f_{\textrm{Loss}}} {\partial \vec W} & =[\frac {\partial f_{\textrm{Loss}}} {\partial W_{11}},\frac {\partial f_{\textrm{Loss}}} {\partial W_{12}},\frac {\partial f_{\textrm{Loss}}} {\partial W_{21}},\frac {\partial f_{\textrm{Loss}}} {\partial W_{22}}]\\
+  & =\frac {\partial f_{\textrm{Loss}}} {\partial \vec S} \frac {\partial \vec S} {\partial \vec W}\\
   & =\frac 2 N \times[n_1\frac {d(1-S_1)} {dS_1},n_2\frac {d(1-S_2)} {dS_2}]\left[ 
   \begin{array}{c}
-  {\frac {\part S_1} {\part W_{11}}}& {\frac {\part S_1} {\part W_{12}}} &
-  {\frac {\part S_1} {\part W_{21}}} &
-  {\frac {\part S_1} {\part W_{22}}}\\
-  {\frac {\part S_2} {\part W_{11}}}& {\frac {\part S_2} {\part W_{12}}} &
-  {\frac {\part S_2} {\part W_{21}}} &
-  {\frac {\part S_2} {\part W_{22}}}
+  {\frac {\partial S_1} {\partial W_{11}}}& {\frac {\partial S_1} {\partial W_{12}}} &
+  {\frac {\partial S_1} {\partial W_{21}}} &
+  {\frac {\partial S_1} {\partial W_{22}}}\\
+  {\frac {\partial S_2} {\partial W_{11}}}& {\frac {\partial S_2} {\partial W_{12}}} &
+  {\frac {\partial S_2} {\partial W_{21}}} &
+  {\frac {\partial S_2} {\partial W_{22}}}
   \end{array}
   \right]\\
 
   \end{align}
   $$
+
   采用差分方式代替偏导。并将各参数放大 $2^{7}=128$ 倍以提高精度。
+
   $$
-  \frac {\part S_1} {\part W_{11}}=\frac {S_1(W_{11})-S_1(W_{11}-\Delta W_{11})} {W_{11}-\Delta W_{11}}
+  \frac {\partial S_1} {\partial W_{11}}=\frac {S_1(W_{11})-S_1(W_{11}-\Delta W_{11})} {W_{11}-\Delta W_{11}}
   $$
+
   然后利用梯度下降公式更新参数：
+
   $$
   W^{'}= W-\eta\times\frac {\partial f_{\textrm{Loss}}} {\partial W}
   $$
@@ -423,7 +450,7 @@ __u8 ** Convolution(__u8 *image[],__u8 *filter[]){
             }
         }
     }
-	return conv_result；
+	return conv_result;
 }
 //ReLU 激活函数
 __u8** ReLU(__u8 *x[],int n){
@@ -453,11 +480,11 @@ __u8 ** Pooling(__u8 *conv_result[]){
 }
 
 //全连接层, 返回值是一维数组
-__u8 *FullConnectLayer(__u8 *pool_result[],__u8 FCL_filter0* []，__u8 FCL_filter2* []，...，__u8 FCL_filter9* []，){
+__u8 *FullConnectLayer(__u8 *pool_result[],__u8 FCL_filter0* [], __u8 FCL_filter2* []，...，__u8 FCL_filter9* []，){
     //全连接层应该有10个神经元：对应数字识别
     __u8 neuron[10];
     for(i=0;i<10;i++){
-	   Neuron[i]=**Convolution(pool_result,FCL_filter{i})；
+	   Neuron[i]=**Convolution(pool_result,FCL_filter{i});
     }
     return neuron;
 }
@@ -505,7 +532,7 @@ int main(){
     	FCL_filter0,...,FCL_filter9)),10
         );
 
-    /*训练：进行验证，误差反向传播，使用BP算法训练参数 
+    /*训练：进行验证，误差反向传播，使用BP算法训练参数 */
 
     //误差可以采用均方误差（交叉熵要用log，算了）
     //每训练一组（batch），一组n张图，计算一次loss，然后用BP算法调参
@@ -536,3 +563,7 @@ int main(){
 
 6. 全连接层：https://zhuanlan.zhihu.com/p/33841176
 
+<!-- Mathjax Support -->
+<script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>

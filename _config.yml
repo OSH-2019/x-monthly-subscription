@@ -1,0 +1,2 @@
+kramdown:
+  math_engine: mathjax

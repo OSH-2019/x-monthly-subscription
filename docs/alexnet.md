@@ -1,6 +1,8 @@
 # AlexNet 调研报告
 
 [TOC]
+1. 
+{:toc}
 
 ## 一、 背景
 
@@ -61,25 +63,25 @@ AlexNet 属于深层卷积神经网络， 2015年在 ImageNet 图像识别挑战
 
 ReLU 为非饱和函数，论文中验证其效果在较深的网络超过了 Sigmoid，成功解决了 Sigmoid 在网络较深时的梯度弥散问题。
 
-+ Dropout 避免模型过拟合
++ Dropout 避免模型过拟合。
 
 在训练时使用 Dropout 随机忽略一部分神经元，以避免模型过拟合。在 AlexNet 的最后几个全连接层中使用了 Dropout。
 
-+ 重叠的最大池化
++ 重叠的最大池化。
 
 之前的 CNN 中普遍使用平均池化，而 Alexnet 全部使用最大池化，避免平均池化的模糊化效果。并且，池化的步长小于核尺寸，这样使得池化层的输出之间会有重叠和覆盖，提升了特征的丰富性。
 
-+ 提出 LRN 层
++ 提出 LRN 层。
 
 提出 LRN 层，对局部神经元的活动创建竞争机制，使得响应较大的值变得相对更大，并抑制其他反馈较小的神经元，增强了模型的泛化能力。
 
-+ GPU 加速
++ GPU 加速。
 
-将卷积池化部分分成两组交给两个 GPU 完成，利用 GPU 计算能力增加计算速度
+将卷积池化部分分成两组交给两个 GPU 完成，利用 GPU 计算能力增加计算速度。
 
-+ 数据增强
++ 数据增强。
 
-随机从 256\*256 的原始图像中截取 224\*224 大小的区域（以及水平翻转的镜像），相当于增强了 (256-224) \* (256-224) \* 2 = 2048 倍的数据量。使用了数据增强后，减轻过拟合，提升泛化能力。避免因为原始数据量的大小使得参数众多的 CNN 陷入过拟合中。
+随机从 $256 \times 256$ 的原始图像中截取 $224 \times 224$ 大小的区域（以及水平翻转的镜像），相当于增强了 $(256-224) \times (256-224) \times 2 = 2048$ 倍的数据量。使用了数据增强后，减轻过拟合，提升泛化能力。避免因为原始数据量的大小使得参数众多的 CNN 陷入过拟合中。
 
 AlexNet 被认为是计算机视觉领域发表的最具影响力的论文之一，它引发了更多的论文采用 CNN 和 GPU 加速深度学习。截至 2019 年，AlexNet 论文已被引用超过 40,000 次。下面将详细解释其原理。
 
@@ -97,13 +99,13 @@ AlexNet 被认为是计算机视觉领域发表的最具影响力的论文之一
 
 AlexNet 采用重叠卷积池化的方法，步长小于卷积核的尺寸。
 
-两个卷积层移动步长是4个像素，分成两组在两个 GPU 上计算。
+两个卷积层移动步长是 4 个像素，分成两组在两个 GPU 上计算。
 
-ReLU 后的像素层再经过池化运算，池化运算的尺寸为 3×3。
+ReLU 后的像素层再经过池化运算，池化运算的尺寸为 $3 \times 3$。
 
-池化后的像素层再进行归一化处理，归一化运算的尺寸为 5×5，归一化后的像素规模不变，同样分成两组在两个 GPU 上计算。
+池化后的像素层再进行归一化处理，归一化运算的尺寸为 $5 \times 5$，归一化后的像素规模不变，同样分成两组在两个 GPU 上计算。
 
-**卷积**
+#### 卷积
 
 在高等数学中，我们学过，函数 $f(x),g(x)$ 的卷积运算为
 
@@ -121,7 +123,7 @@ $$
 
 我们可以看到，卷积核每次作用于输入图像上的一个局部区域（被称为感受野）进行运算，可以理解为将该局部位置的特征积累起来得到一个特征值。显然，不同大小、数值的卷积核，提取到的特征也是不同的。通过调整卷积核的大小、数值等参数，我们可以控制对图像特征提取的偏好，达到筛选特征进行分类的目标。
 
-**池化**
+#### 池化
 
 池化常是卷积的下一步，也是一种矩阵运算。其目的是通过只保留主要特征、忽略次要特征减少数据量，优化计算复杂度。
 
@@ -141,11 +143,11 @@ $$
 
 ![](files/alexnet/全连接层4.png)
 
-全连接层的存在可以排除特征所在空间位置对特征识别结果的干扰，提高模型的鲁棒性。(实际应用中，也有其他替代全连接层以减少参数量的方法)
+全连接层的存在可以排除特征所在空间位置对特征识别结果的干扰，提高模型的鲁棒性。(实际应用中，也有其他替代全连接层以减少参数量的方法)。
 
 ### 4. Softmax 归一化
 
-Softmax 被用于接收来自全连接层的输入，产生最后的结果（以图像分类问题为例，最终的结果是各个可能类别的概率）
+Softmax 被用于接收来自全连接层的输入，产生最后的结果（以图像分类问题为例，最终的结果是各个可能类别的概率）。
 
 公式如下：
 
@@ -169,7 +171,7 @@ $$
 L_{i+1} = W_iL_{i} + b_i
 $$
 
-对于 ReLU 和 Softmax 层，函数作用在矩阵上的方式为作用在矩阵的每个元素上
+对于 ReLU 和 Softmax 层，函数作用在矩阵上的方式为作用在矩阵的每个元素上。
 
 ### 6. 反向传播算法
 
@@ -181,7 +183,7 @@ $$
 W^{'}= W-\eta\times\frac {\partial f_{\textrm{Loss}}} {\partial W}
 $$
 
-梯度下降直观过程如下图。类似一步步走下山坡知道最低点（存在的问题是得到的目标点有可能是极小值点而非最小值点）
+梯度下降直观过程如下图。类似一步步走下山坡知道最低点（存在的问题是得到的目标点有可能是极小值点而非最小值点）。
 
 ![](files/alexnet/梯度下降.png)
 
@@ -279,7 +281,7 @@ $$
 \frac{\partial \textrm{Loss}}{\partial LP_{ij}} = \frac{\partial \textrm{Loss}}{\partial L_i} \cdots \frac{\partial L_j}{\partial LP_{ij}}
 $$
 
-这样可以得到偏差对于每层输入的梯度表达式
+这样可以得到偏差对于每层输入的梯度表达式。
 
 #### (2). 更新参数
 
@@ -287,7 +289,7 @@ $$
 LP_{ij}^{\textrm{new}} = LP_{ij} - \eta \cdot \frac{\partial \textrm{Loss}}{\partial LP_{ij}}
 $$
 
-其中 $\eta$ 为 学习率
+其中 $\eta$ 为 学习率。
 
 ### 7. AlexNet 结构
 
@@ -331,8 +333,8 @@ AlexNet 中 Dropout 用在两个全连接层中。
 
 ### 8. Agilio SmartNIC 在训练 AlexNet 上的优势
 
-   1. 数据流架构与 NPU
-   2. 可编程的数据通路
+   1. 数据流架构与 NPU。
+   2. 可编程的数据通路。
 
 ## 三、AlexNet 在 Agilio SmartNIC 的实现
 
@@ -429,7 +431,7 @@ Agilio SmartNIC 上有很多相对独立的流处理核心，可以给每个核�
 
 整个迭代过程分为输入数据，前向传播，计算梯度，更新参数。其中后面三个阶段均会涉及到多个处理核心之间的通信，以及核与存储之间大量数据读写。
 
-### 4. C 代码示例
+### 4. C 伪代码示例
 
 ```c
 //输入：8x8(每个像素点0-255,__u8)(只有一层的灰度图)
@@ -536,13 +538,13 @@ int main(){
 
     //误差可以采用均方误差（交叉熵要用log，算了）
     //每训练一组（batch），一组n张图，计算一次loss，然后用BP算法调参
-    double loss=(求和(result-true_value)*(result-true_value))/n
+    double loss=(sum((result-true_value)*(result-true_value))/n;
 
     //BP 算法，需事先把偏导式写出
     //这里要调整的参数有：卷积核5x5=25 + FCL卷积核 10x2x2=40 =65个参数
     wi-=eta*(A*wi+B*wj+C*wk+...);  
 
-    printf("Pridiction is %d",result);
+    printf("Pridiction is %d\n",result);
 }
 ```
 
@@ -557,13 +559,21 @@ int main(){
 
 5. AlexNet 结构：
 
-   a.<http://cvml.ist.ac.at/courses/DLWT_W17/material/AlexNet.pdf>
+   1. <http://cvml.ist.ac.at/courses/DLWT_W17/material/AlexNet.pdf>
 
-   b.<http://vision.stanford.edu/teaching/cs231b_spring1415/slides/alexnet_tugce_kyunghee.pdf>
+   2. <http://vision.stanford.edu/teaching/cs231b_spring1415/slides/alexnet_tugce_kyunghee.pdf>
 
-6. 全连接层：https://zhuanlan.zhihu.com/p/33841176
+6. 全连接层：<https://zhuanlan.zhihu.com/p/33841176>
 
 <!-- Mathjax Support -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+  </script>
 <script type="text/javascript" async
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>

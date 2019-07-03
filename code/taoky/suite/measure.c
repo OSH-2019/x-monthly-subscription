@@ -48,9 +48,10 @@ __inline uint64_t measure(int sock_send, int sock_recv, byte *send_buf, struct s
 int main(int argc, char** argv) {	
     int check_times = 10;
     int correct_data = true;
+    int raw = false;
     require_root();
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-        fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH] [TEST CHECK TIMES] [CORRECT? (1/0)]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH] [TEST CHECK TIMES] [CORRECT? (1/0)] [RAW? (1/0)]\n", argv[0]);
         exit(-1);
     }
 
@@ -62,6 +63,8 @@ int main(int argc, char** argv) {
         if (argc >= 4) check_times = atoi(argv[3]);
         if (argc >= 5 && strcmp("0", argv[4]) == 0)
             correct_data = 0;
+        if (argc >= 6 && strcmp("1", argv[5]) == 0)
+            raw = 1;
     }
     int sock_send = sender_prepare(send_iface);
     int sock_recv = receiver_prepare(recv_iface);
@@ -85,7 +88,12 @@ int main(int argc, char** argv) {
             double data;
             for (int i = 0; i < 32; i++) {
                 scanf(" %lf", &data);
-                memcpy(send_buf + 16 + 8 * i, &data, sizeof data);
+                if (raw)
+                    memcpy(send_buf + 16 + 8 * i, &data, sizeof data);
+                else {
+                    unsigned int data_int = (unsigned int)(data * 1024);
+                    memcpy(send_buf + 16 + 4 * i, &data_int, sizeof(data_int));
+                }
             }
         } else {
             int fd = open("/dev/urandom", O_RDONLY);

@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
                 const double e = 0.1;
                 unsigned int tot = 0;
                 for (int i = 8; i < 16; ++i) {
-                    tot += packet->data_raw[i] >= mean ? (
+                    tot += packet->data_raw[i] >= mean ? 
                             (packet->data_raw[i] - mean >= e ? 1u : 0u) : (
                                 mean - packet->data_raw[i] >= e ? 1u : 0u);
                 }

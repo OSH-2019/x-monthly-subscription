@@ -84,6 +84,8 @@ int main(int argc, char** argv) {
                 } else {
                     puts("AAAAA!");
                 }
+            } else {
+                // let's zjx
             }
         }
     }

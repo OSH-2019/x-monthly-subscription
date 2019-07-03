@@ -28,11 +28,11 @@ process_packet:                         # @process_packet
     if r5 >= 42 goto CH_DT0_B
     w6 = 42
     w6 -= w5
-    r4 >>= w6
+    r4 >>= r6
     goto CH_DT0_CHUNK
 CH_DT0_B:
     w5 -= 42
-    r4 <<= w5
+    r4 <<= r5
 CH_DT0_CHUNK:
     r4 <<= 32
     r4 >>= 32
@@ -48,11 +48,11 @@ CH_DT0_CHUNK:
     if r5 >= 42 goto CH_DT1_B
     w6 = 42
     w6 -= w5
-    r2 >>= w6
+    r2 >>= r6
     goto CH_DT1_CHUNK
 CH_DT1_B:
     w5 -= 42
-    r2 <<= w5
+    r2 <<= r5
 CH_DT1_CHUNK:
     r2 <<= 32
     r2 >>= 32
@@ -73,11 +73,11 @@ CH_DT1_CHUNK:
     if r5 >= 42 goto CH_DT2_B
     w6 = 42
     w6 -= w5
-    r9 >>= w6
+    r9 >>= r6
     goto CH_DT2_CHUNK
 CH_DT2_B:
     w5 -= 42
-    r9 <<= w5
+    r9 <<= r5
 CH_DT2_CHUNK:
     r9 <<= 32
     r9 >>= 32
@@ -96,11 +96,11 @@ CH_DT2_CHUNK:
     if r5 >= 42 goto CH_DT3_B
     w6 = 42
     w6 -= w5
-    r4 >>= w6
+    r4 >>= r6
     goto CH_DT3_CHUNK
 CH_DT3_B:
     w5 -= 42
-    r4 <<= w5
+    r4 <<= r5
 CH_DT3_CHUNK:
     r4 <<= 32
     r4 >>= 32
@@ -119,11 +119,11 @@ CH_DT3_CHUNK:
     if r5 >= 42 goto CH_DT4_B
     w6 = 42
     w6 -= w5
-    r9 >>= w6
+    r9 >>= r6
     goto CH_DT4_CHUNK
 CH_DT4_B:
     w5 -= 42
-    r9 <<= w5
+    r9 <<= r5
 CH_DT4_CHUNK:
     r9 <<= 32
     r9 >>= 32
@@ -142,11 +142,11 @@ CH_DT4_CHUNK:
     if r5 >= 42 goto CH_DT5_B
     w6 = 42
     w6 -= w5
-    r7 >>= w6
+    r7 >>= r6
     goto CH_DT5_CHUNK
 CH_DT5_B:
     w5 -= 42
-    r7 <<= w5
+    r7 <<= r5
 CH_DT5_CHUNK:
     r7 <<= 32
     r7 >>= 32
@@ -165,11 +165,11 @@ CH_DT5_CHUNK:
     if r5 >= 42 goto CH_DT6_B
     w6 = 42
     w6 -= w5
-    r8 >>= w6
+    r8 >>= r6
     goto CH_DT6_CHUNK
 CH_DT6_B:
     w5 -= 42
-    r8 <<= w5
+    r8 <<= r5
 CH_DT6_CHUNK:
     r8 <<= 32
     r8 >>= 32
@@ -188,11 +188,11 @@ CH_DT6_CHUNK:
     if r5 >= 42 goto CH_DT7_B
     w6 = 42
     w6 -= w5
-    r9 >>= w6
+    r9 >>= r6
     goto CH_DT7_CHUNK
 CH_DT7_B:
     w5 -= 42
-    r9 <<= w5
+    r9 <<= r5
 CH_DT7_CHUNK:
     r9 <<= 32
     r9 >>= 32
@@ -217,11 +217,11 @@ CH_DT7_CHUNK:
     if r5 >= 42 goto CH_DT8_B
     w6 = 42
     w6 -= w5
-    r9 >>= w6
+    r9 >>= r6
     goto CH_DT8_CHUNK
 CH_DT8_B:
     w5 -= 42
-    r9 <<= w5
+    r9 <<= r5
 CH_DT8_CHUNK:
     r9 <<= 32
     r9 >>= 32
@@ -247,11 +247,11 @@ LD_DT9:
     if r5 >= 42 goto CH_DT9_B
     w6 = 42
     w6 -= w5
-    r9 >>= w6
+    r9 >>= r6
     goto CH_DT9_CHUNK
 CH_DT9_B:
     w5 -= 42
-    r9 <<= w5
+    r9 <<= r5
 CH_DT9_CHUNK:
     r9 <<= 32
     r9 >>= 32
@@ -276,11 +276,11 @@ LD_DT10:
     if r5 >= 42 goto CH_DT10_B
     w6 = 42
     w6 -= w5
-    r8 >>= w6
+    r8 >>= r6
     goto CH_DT10_CHUNK
 CH_DT10_B:
     w5 -= 42
-    r8 <<= w5
+    r8 <<= r5
 CH_DT10_CHUNK:
     r8 <<= 32
     r8 >>= 32
@@ -305,11 +305,11 @@ LD_DT11:
     if r5 >= 42 goto CH_DT11_B
     w6 = 42
     w6 -= w5
-    r7 >>= w6
+    r7 >>= r6
     goto CH_DT11_CHUNK
 CH_DT11_B:
     w5 -= 42
-    r7 <<= w5
+    r7 <<= r5
 CH_DT11_CHUNK:
     r7 <<= 32
     r7 >>= 32
@@ -334,11 +334,11 @@ LD_DT12:
     if r5 >= 42 goto CH_DT12_B
     w6 = 42
     w6 -= w5
-    r9 >>= w6
+    r9 >>= r6
     goto CH_DT12_CHUNK
 CH_DT12_B:
     w5 -= 42
-    r9 <<= w5
+    r9 <<= r5
 CH_DT12_CHUNK:
     r9 <<= 32
     r9 >>= 32
@@ -363,11 +363,11 @@ LD_DT13:
     if r5 >= 42 goto CH_DT13_B
     w6 = 42
     w6 -= w5
-    r8 >>= w6
+    r8 >>= r6
     goto CH_DT13_CHUNK
 CH_DT13_B:
     w5 -= 42
-    r8 <<= w5
+    r8 <<= r5
 CH_DT13_CHUNK:
     r8 <<= 32
     r8 >>= 32
@@ -392,11 +392,11 @@ LD_DT14:
     if r5 >= 42 goto CH_DT14_B
     w6 = 42
     w6 -= w5
-    r7 >>= w6
+    r7 >>= r6
     goto CH_DT14_CHUNK
 CH_DT14_B:
     w5 -= 42
-    r7 <<= w5
+    r7 <<= r5
 CH_DT14_CHUNK:
     r7 <<= 32
     r7 >>= 32
@@ -421,11 +421,11 @@ LD_DT15:
     if r5 >= 42 goto CH_DT15_B
     w6 = 42
     w6 -= w5
-    r8 >>= w6
+    r8 >>= r6
     goto CH_DT15_CHUNK
 CH_DT15_B:
     w5 -= 42
-    r8 <<= w5
+    r8 <<= r5
 CH_DT15_CHUNK:
     r8 <<= 32
     r8 >>= 32

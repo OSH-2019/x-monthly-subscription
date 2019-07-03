@@ -85,23 +85,24 @@ int main(int argc, char** argv) {
                     puts("AAAAA!");
                 }
             } else {
-                double mean = 0.;
-                double var = 0.;
+                unsigned int mean = 0;
+                unsigned long long var = 0;
                 for (int i = 0; i < 8; i++) {
-                    mean += packet->data_raw[i];
-                    var += packet->data_raw[i] * packet->data_raw[i];
+                    mean += ((unsigned int)(packet->data_raw[i]*1024));
+                    var += (unsigned long long)((unsigned int)(packet->data_raw[i]*1024)) * ((unsigned int)(packet->data_raw[i]*1024));
                 }
-                mean /= 8; var /= 8;
-                var -= mean * mean;
-                const double e = 0.1;
+                mean >>= 3; var >>= 3;
+                var -= (unsigned long long)mean * mean;
+                const unsigned int e = 0x66;
+                const unsigned int e2 = 0x28a4;
                 unsigned int tot = 0;
                 for (int i = 8; i < 16; ++i) {
-                    tot += packet->data_raw[i] >= mean ? (
-                            packet->data_raw[i]-mean >= e ? 1u : 0u) : (
-                                mean-packet->data_raw[i] >= e ? 1u : 0u);
+                    tot += ((unsigned int)(packet->data_raw[i]*1024)) >= mean ? (
+                            ((unsigned int)(packet->data_raw[i]*1024))-mean >= e ? 1u : 0u) : (
+                                mean-((unsigned int)(packet->data_raw[i]*1024)) >= e ? 1u : 0u);
                 }
                 bool flag = false;
-                if (tot * e * e > (var * 8)) 
+                if ((unsigned long long)tot * e2 > (var << 3)) 
                     flag = true;
                 if ((flag && packet->tag == 1ull) || (!flag && packet->tag == 2ull)) {
                     puts("OK!");

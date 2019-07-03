@@ -32,7 +32,10 @@
 struct packet {
     unsigned long magic;
     unsigned long tag;
-    unsigned int data[16];
+    union {
+        unsigned int data[16];  // 整数化后数据
+        double data_raw[16];  // 原始数据
+    };
 };
 ```
 
@@ -64,7 +67,7 @@ struct packet {
 
 输入 `./xxx --help` 可以获取帮助。
 
-- `measure` 参数分别为 `[接收数据包的 interface] [发送数据包的 interface] [n] [是否发送正确的数据包（1 为正确，0 为错误，错误时从 /dev/urandom 读取随机字符串）]`
-- `sender` 参数为 `[发送数据包的 interface] [数据文件名]`
-- `receiver` 参数为 `[接收数据包的 interface] [信息详细程度（0: 只显示 tag 是否与预期一致，1: 检查 magic 是否完全正确，输出接收到的数据内容，2: 额外显示接收的包的 hexdump）]`
+- `measure` 参数分别为 `[接收数据包的 interface] [发送数据包的 interface] [n] [是否发送正确的数据包（1 为正确，0 为错误，错误时从 /dev/urandom 读取随机字符串）] [是否整数化（1 是，0 否）]`
+- `sender` 参数为 `[发送数据包的 interface] [数据文件名] [是否整数化（1 是，0 否）]`
+- `receiver` 参数为 `[接收数据包的 interface] [信息详细程度（0: 只显示 tag 是否与预期一致，1: 检查 magic 是否完全正确，输出接收到的数据内容，2: 额外显示接收的包的 hexdump）] [是否整数化（1 是，0 否）]`
 

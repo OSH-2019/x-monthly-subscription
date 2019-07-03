@@ -9,3 +9,8 @@
 # jekyll
 Gemfile.lock
 _site
+
+# executable file
+measure
+sender
+receiver

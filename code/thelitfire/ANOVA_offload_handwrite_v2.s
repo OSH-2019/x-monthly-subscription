@@ -38,7 +38,7 @@ CH_DT0_CHUNK:
     r4 >>= 32
 	r2 = *(u64 *)(r1 + 66)	# data[1]
     if r2 == 0 goto CH_DT1_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r2
     r5 >>= 52
     w5 -= 1023
@@ -63,7 +63,7 @@ CH_DT1_CHUNK:
 	r2 += r4				# r2: var
 	r9 = *(u64 *)(r1 + 74)	# data[2]
     if r9 == 0 goto CH_DT2_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r9
     r5 >>= 52
     w5 -= 1023
@@ -86,7 +86,7 @@ CH_DT2_CHUNK:
 	r2 += r9
 	r4 = *(u64 *)(r1 + 82)	# data[3]
     if r4 == 0 goto CH_DT3_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r4
     r5 >>= 52
     w5 -= 1023
@@ -109,7 +109,7 @@ CH_DT3_CHUNK:
 	r2 += r4
 	r9 = *(u64 *)(r1 + 90)	# data[4]
     if r9 == 0 goto CH_DT4_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r9
     r5 >>= 52
     w5 -= 1023
@@ -132,7 +132,7 @@ CH_DT4_CHUNK:
 	r2 += r9
 	r7 = *(u64 *)(r1 + 98)	# data[5]
     if r7 == 0 goto CH_DT5_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r7
     r5 >>= 52
     w5 -= 1023
@@ -155,7 +155,7 @@ CH_DT5_CHUNK:
 	r2 += r7
 	r8 = *(u64 *)(r1 + 106)	# data[6]
     if r8 == 0 goto CH_DT6_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r8
     r5 >>= 52
     w5 -= 1023
@@ -178,7 +178,7 @@ CH_DT6_CHUNK:
 	r2 += r8
 	r9 = *(u64 *)(r1 + 114)	# data[7]
     if r9 == 0 goto CH_DT7_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r9
     r5 >>= 52
     w5 -= 1023
@@ -207,7 +207,7 @@ CH_DT7_CHUNK:
 
 	r9 = *(u64 *)(r1 + 122)	# data[8]
     if r9 == 0 goto CH_DT8_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r9
     r5 >>= 52
     w5 -= 1023
@@ -237,7 +237,7 @@ ABS_DT8:
 LD_DT9:
 	r9 = *(u64 *)(r1 + 130)	# data[9]
     if r9 == 0 goto CH_DT9_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r9
     r5 >>= 52
     w5 -= 1023
@@ -266,7 +266,7 @@ ABS_DT9:
 LD_DT10:
 	r8 = *(u64 *)(r1 + 138)	# data[10]
     if r8 == 0 goto CH_DT10_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r8
     r5 >>= 52
     w5 -= 1023
@@ -295,7 +295,7 @@ ABS_DT10:
 LD_DT11:
 	r7 = *(u64 *)(r1 + 146)	# data[11]
     if r7 == 0 goto CH_DT11_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r7
     r5 >>= 52
     w5 -= 1023
@@ -324,7 +324,7 @@ ABS_DT11:
 LD_DT12:
 	r9 = *(u64 *)(r1 + 154)	# data[12]
     if r9 == 0 goto CH_DT12_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r9
     r5 >>= 52
     w5 -= 1023
@@ -353,7 +353,7 @@ ABS_DT12:
 LD_DT13:
 	r8 = *(u64 *)(r1 + 162)	# data[13]
     if r8 == 0 goto CH_DT13_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r8
     r5 >>= 52
     w5 -= 1023
@@ -382,7 +382,7 @@ ABS_DT13:
 LD_DT14:
 	r7 = *(u64 *)(r1 + 170)	# data[14]
     if r7 == 0 goto CH_DT14_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r7
     r5 >>= 52
     w5 -= 1023
@@ -411,7 +411,7 @@ ABS_DT14:
 LD_DT15:
 	r8 = *(u64 *)(r1 + 178)	# data[15]
     if r8 == 0 goto CH_DT15_CHUNK
-    r0 -= 1
+    r0 = 4503599627370495 ll
     r5 = r8
     r5 >>= 52
     w5 -= 1023

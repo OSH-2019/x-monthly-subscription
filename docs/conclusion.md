@@ -4,13 +4,13 @@
 
 [TOC]
 
-## 项目介绍
+# 项目介绍
 
 **我们的项目是：**对计算机在数据包处理上进行非冯化改造，绕过 CPU 与操作系统内核，在数据流架构的智能网卡上对数据包进行数据流驱动的实时处理。依据不同的处理需求，设计并实现不同的算法，并将程序硬件卸载到智能网卡上以完成数据处理。目标是纳秒级的延迟。
 
 **我们涉及的数据处理需求包括：**基于方差分析（Analysis of Variance，ANOVA）算法的数据状态切分，和简化的 Alex net 深层卷积神经网络。对于前者，我们完整实现了数据准备与接收程序，方差分析算法的 eBPF 硬件卸载代码，以及基于 rdtsc 指令的延迟测试程序，并成功获得了正确结果。对于后者，我们完成了对算法本身的调研，以及容易编程的对算法的简化设计。
 
-## 立项依据
+# 立项依据
 
 基于冯诺依曼架构的现代计算机，由于程序计数器（Program Counter）带来的硬件根本概念的串行性，使得处理大批量数据流的能力十分有限。尽管现代计算机利用指令级并行、多核多线程编程等带来了大幅的性能提升，但在例如服务器等的海量 IO 和数据并发场景下，冯氏结构与并行性之间的矛盾愈加显著。与此同时，CPU 与主存之间的速度不一致进一步限制了海量数据并发下的处理效率。
 
@@ -20,13 +20,13 @@
 
 Netronome 公司生产的 Agilio CX SmartNIC 同时直接支持 P4 和 micro C 高级语言编程，利用其专有的 SDK 编写、编译、调试、检测程序，并可以使用扩充命令充分利用网卡内的公共存储、矩阵运算单元等硬件结构，实现更为高级的大型算法。
 
-## 基于方差分析算法的状态切分 eBPF 实现
+# 基于方差分析算法的状态切分 eBPF 实现
 
 本部分详细叙述第一个数据处理需求，也是本课题唯一必须完成的实现：基于方差分析算法的数据状态切分。算法实现包括紧密联系的外部数据处理部分与网卡内部的 eBPF 核心计算部分。
 
 在本报告中，硬件环境信息将分布地以***斜体加粗***给出，关键思想、结论等将以**粗体**给出。
 
-### 状态切分的应用背景
+## 状态切分的应用背景
 
 考虑对时间均匀采样的离散数据流：如每 10 ms 采集一次的人的加速度信息，每天收盘时各个股票的股价等。将时间作为离散自变量，数据的值（或值的组合）作为因变量，我们试图在不同的时间节点，划分出不同的极大数据区间，使得同一个数据区间内的数据代表同一个被采样者的行为特征。
 
@@ -36,7 +36,7 @@ Netronome 公司生产的 Agilio CX SmartNIC 同时直接支持 P4 和 micro C �
 
 状态切分算法是模式匹配机器学习的关键前期数据准备工作。做好了状态切分的数据可以发送到学习机器上，使机器学习出不同的状态所具有的数据特征（比如加速度的绝对大小，相对大小变化，增减性等），以及识别出该状态序列（或者说标记了状态的数据序列）对应哪个具体的人类动作——对上例来说，人是在站起还是坐下。这是后续的学习算法所识别出来的，而状态切分算法不关心数据对应的状态的 “含义” ，而只关心新数据是否意味着一个不同于前者的状态。
 
-### 方差分析的基本思想
+## 方差分析的基本思想
 
 统计学上有理由认为：相同的状态所对应的各个数据应当具有相同的统计分布。当新的一段数据到来时，通过一定的算法，可以判断该段数据是否符合前一段数据的统计分布，进而决定是否切分状态。
 
@@ -55,7 +55,7 @@ $$
 
 切比雪夫不等式的放缩是十分宽松的，这从根本上影响我们划分的效果：我们不会对并不大的波动十分敏感。这有时是一些场景下本算法的优点，但在一些其他场合也会成为缺陷。
 
-### 短抽样间隔、大数据窗口的方差分析算法设计及其 eBPF 实现的不可行性
+## 短抽样间隔、大数据窗口的方差分析算法设计及其 eBPF 实现的不可行性
 
 考虑上面提到的人体加速度数据，典型的应用中，抽样间隔是 10 ms 左右，一个窗口大约取 5s，重叠率在 70% 到 80%。在易于编程而不违背算法根本的前提下，取窗口为固定数据个数 512 个的窗口，重叠率 75%，即每次替换 128 个数据。
 
@@ -63,7 +63,7 @@ $$
 
 *本节所述中使用的数据由杜文文学长提供。*
 
-#### 方差分析的窗口抽样算法
+### 方差分析的窗口抽样算法
 
 切比雪夫不等式是用 “随机变量 X ” 来做不等式判定的，不等式中的 x 应当是一个随机变量的值。这种抽样算法进一步考虑了这种数学限定，构造一个随机变量：对于窗口中的512个数据，每次随机无放回抽样 128 个，计算这 128 个数据的均值 mean 和方差 var，共做 64 次抽样。这样，这里的 mean 和 var 都可以看做随机变量，它们是不等式中的 x，而不等式中的均值和方差则是前一个窗口用同样方法得到的mean的均值和方差、var的均值和方差（64 次抽样，计算 64 次的均值和方差）。
 
@@ -71,7 +71,7 @@ $$
 
 只有含有大量数据窗口是能够多次随机抽样的，对于数据量较小的窗口，多次随机抽样后的数据不具有充分的独立性，而抽样次数过少又不利于得到优秀的不等式比较结果。
 
-#### eBPF 硬件卸载架构的限制与抽样算法实现的不可行性
+### eBPF 硬件卸载架构的限制与抽样算法实现的不可行性
 
 ***我们使用的智能网卡型号为：Agilio CX SmartNIC 2x10Gbe。***
 
@@ -88,7 +88,7 @@ $$
 
 为避免它，最好的办法就是做有放回随机抽样，或者根本不抽样。无论前者还是后者，最终都会在指令个数限制上被彻底宣告死刑。
 
-#### 指令数限制与非抽样算法实现的不可行性
+### 指令数限制与非抽样算法实现的不可行性
 
 如果干脆就不抽样，不等式中的 x 就是后一个窗口中的数据本身，均值和方差就是前一个窗口的数据本身的均值和方差，这样计算量显然会大大缩短，但是依旧会超过指令条数的限制：
 - eBPF 架构本身规定指令字节码不得超过 4096 字节。大多 eBPF 指令是 64 位的，这意味着指令数不超过 512。进一步地，网卡的硬件卸载架构会将 64 位 eBPF指令转化为自身的 32 位指令（网卡指令字节码大小不超过 8192 字节），同时不支持尾跳转，这会进一步限制 eBPF 指令的条数。
@@ -97,7 +97,7 @@ $$
 
 **总之，从根本上，由于指令数的限制，大数据窗口的方差分析无法通过 eBPF 硬件卸载编程实现。**
 
-### 长抽样间隔、小数据窗口的方差分析算法
+## 长抽样间隔、小数据窗口的方差分析算法
 
 另一种状态切分的应用场景是像股票价格这种抽样间隔较长（一天一次），且数据窗口不宜取得太大（一般取七八个数据为一个窗口，这就对应了一周的股价数据）否则不具备实时即刻的应用意义。接下来本小组使用的数据也是每日一更新的股价数据。
 
@@ -105,7 +105,7 @@ $$
 
 *本节所述中使用的数据由刑凯老师提供。*
 
-#### 窗口、算法与数据包格式的规定
+### 窗口、算法与数据包格式的规定
 
 在不违反算法本质核心的前提下，取窗口为固定数据个数为 8 个，每两个完全相邻的窗口重叠 7 个数据（即只更新一天的最新股价）。
 
@@ -164,11 +164,11 @@ static __always_inline __u32 double_to_u32(__u64 data){
 
 本小组对两个方式都有所实现。前者的代码请参阅 [手写汇编 version 2](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v2.s) 和 [C 程序描述](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_v2.c)，后者的请参阅 [手写汇编 version 1](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v1.s) 和 [C 程序描述](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_v1.c) 。二者的本质是一样的，只是 version 2 相较 version 1 多了三百多行汇编指令，都是浮点数转整数的过程。
 
-#### eBPF 算法实现
+### eBPF 算法实现
 
 接下来以 version 1 （在外部程序完成整数化的版本）为主体叙述算法的 eBPF 实现过程。讲述直接使用 clang 等编译器获得汇编码、机器编译汇编如何不能被 verifier 通过、机器汇编能告诉我们什么、手写汇编并最终通过 verifier，这四个大的过程。
 
-##### 使用 clang 和 llvm 获得编译结果
+#### 使用 clang 和 llvm 获得编译结果
 
 ***我们使用的编译环境为：***
 
@@ -187,7 +187,7 @@ llvm-mc -triple bpf -filetype=obj -o ANOVA_offload_v11.o ANOVA_offload_v11.s
 
 **这里 O2 优化或其他优化选项是必须的**，因为函数调用必须内联并同时优化指令条数。否则，很多时候 verifier 会给出类似 “compiler bug” 等类似的错误信息。
 
-另一种编译方式由 Netronome 官方通过邮件推荐，可以尽可能生成网卡本身支持的 32 位 ALU 指令，而非 eBPF 自带而不得不另做更复杂转换的 64 位 ALU 指令：
+另一种编译方式由 Netronome 官方通过邮件推荐，可以尽可能生成网卡本身支持的 32 位 ALU 指令，而不是 eBPF 自带但不得不另做更复杂转换的 64 位 ALU 指令：
 
 ```
 clang -emit-llvm -O2 -S ANOVA_offload_v1.c -o ANOVA_offload_v10.ll -target bpf
@@ -196,17 +196,19 @@ llc -mattr=+alu32 ANOVA_offload_v10.ll
 
 将产生名为 ANOVA_offload_v10.s 的可视汇编代码。
 
-##### verifier 拒绝汇编结果
+#### verifier 拒绝汇编结果
 
 如前所述，verifier 会检查 obj 文件是否符合网卡本身的限制。直到目前，我们没有任何一个 ANOVA 算法程序仅仅使用编译器就能通过 verifier。
 
 在不包括指令数超限，产生循环等广为人知的 eBPF 限制的情况下，如今产生的 verifier 报错包括但不限于：
-- 上述第一种编译方式中，我们的算法涉及到 32 位乘 32 位得到 64 位数据的运算。这是网卡支持的，但必须让 verifier 清晰明确地知道操作数寄存器内的值是一定不超过 32 位的，这可以通过对 64 位寄存器先向左移 32 位再向右逻辑移32位，然后做乘法运算。**但 clang 编译器在诸多地方，包括这两个移位和乘法运算的指令中间进行了类似的乱序处理，将乘法指令排到了移位之前**。最终导致 verifier 拒绝乘法指令。
-- 在一些偶发而可能不出现的场景下，verifier 拒绝由 eBPF 指令集支持的大约三百条指令范围的跳转。
+- 上述第一种编译方式中，我们的算法涉及到 32 位乘 32 位得到 64 位数据的运算。这是网卡支持的，但必须让 verifier 清晰明确地知道操作数寄存器内的值是一定不超过 32 位的，这可以通过对 64 位寄存器先向左移 32 位再向右逻辑移32位，然后做乘法运算。**但 clang 编译器在诸多地方，包括这两个移位和乘法运算的指令中间进行了类似的乱序处理，将乘法指令排到了移位之前**。最终导致 verifier 拒绝乘法指令。在另外一些情况下，编译器汇编以 32 位数格式取出数据包数据，但却毫不必要地以 64 位格式存入栈空间，然后后来取出来利用，导致原本可以看作 32 位数的被视作 64 位。下图展示了这一效果。
+- 在一些偶发场景下，verifier 拒绝由 eBPF 指令集支持的大约三百条指令范围的跳转。
 - 在上述第二种编译方式下，生成的诸多 32 位指令，有些根本不能通过 llvm-mc 将汇编文件 .s 转化为 obj 文件。比如 32 位向 64 位寄存器赋值。
 - 在上述第二种编译方式下，有些 eBPF 指令级支持但不被网卡支持的指令，比如对 32 位而非 64 位寄存器做移位运算，也被编译器产生，进而被 verifier 拒绝。
 
-##### 编译器产生的汇编代码中可以窥见的内容
+![](files/conclusion/verifier-mul.PNG)
+
+#### 编译器产生的汇编代码中可以窥见的内容
 
 以上诸多情形使本小组不得不转而放弃编译器，直接手写汇编代码。但编译器产生的结果也值得参考。比如寄存器使用：
 - r0 是返回值寄存器，对于不同的 XDP 命令（丢弃，通过，弹回等）有不同的确定的返回值，本小组实验中 r0 = 2 为通过。
@@ -214,13 +216,252 @@ llc -mattr=+alu32 ANOVA_offload_v10.ll
 - r10 是只读栈指针，对栈指针的访问必须通过常量偏移（否则将会被 verifier 拒绝）。本实验最终没有用到栈空间和 r10 寄存器。
 - 剩下的都可以作为通用寄存器。
 
-##### 手写汇编代码设计
+下图展示了借鉴于官方 XDP 编程实例的数据包提取 C 写法（图右），以及借鉴的编译器产生的对应汇编过程（图左）。
+
+![](files/conclusion/CandAssem.PNG)
+
+#### 手写汇编代码设计
 
 本小组最终得到的两个汇编代码，eBPF负责浮点数转换的 [手写汇编 version 2](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v2.s) 以及外部负责浮点数转换的 [手写汇编 version 1](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v1.s)，均以编译器结果做为参考，对照各自的 C 程序人工翻译而成，并较编译器结果有如下优点：
 - 手写汇编不使用栈空间，数据要么放在寄存器内要么从数据包内一次取出；而编译器时常使用栈空间却并没有必要
 - 代码量更短，甚至对于外部浮点转换版本 version 1，手写汇编代码指令数目只有编译器结果的近一半，version 2 的编译器结果并不能满足指令数限制而手写汇编只有约四百条。
 - 能够通过 verifier
 
-#### 外部包准备、发送、接收、测时、验证程序设计
+下图展示了两个 version 的最终指令条数。version 1 仅 119 条，version 2 共 407 条。
 
-本节叙述运行在服务器 CPU 上的，为网卡整合处理原始数据并发送数据包，待网卡处理结束后收回数据包并检验 tag 域的修改（表示是否做状态划分）是否与预期一致，并测算网卡运算延迟的程序。
+![](files/conclusion/llvmobjdump-v1.PNG)
+
+![](files/conclusion/llvmobjdump-v2.PNG)
+
+### 外部包准备、发送、接收、测时、验证程序设计
+
+本节叙述运行在服务器 CPU 上的，为网卡整合处理原始数据并发送数据包，待网卡处理结束后收回数据包并检验 tag 域的修改（表示是否做状态划分）是否与预期一致，并测算网卡运算延迟的程序。分数据包准备、发送、接收与验证，以及延迟测算两个部分
+
+#### 数据包的准备、发送、接收与验证
+
+在我们所使用的服务器上，所使用的智能网卡暴露了两个接口：`ens160np0` 和 `ens160np1`：
+
+```
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: ens192: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 00:50:56:af:4a:dc brd ff:ff:ff:ff:ff:ff
+3: ens160np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 00:15:4d:13:5d:26 brd ff:ff:ff:ff:ff:ff
+4: ens160np1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 00:15:4d:13:5d:27 brd ff:ff:ff:ff:ff:ff
+```
+
+我们的 eBPF 程序挂载在 `ens160np1` 上。而物理上，这两个网卡接口是通过一根网线直接相连的。
+
+**本小组是远程 ssh 操作服务器的**，服务器另有一连接外网、只有一个接口的网卡。基于此，本小组尝试过为这两个智能网卡接口配置唯一 IP 以定向传送数据包，但尝试最终失败。最后我们采用了比较简便的广播方式：服务器向 `ens160np0` 发送广播包，从 `ens160np1` 接收广播包。
+
+数据包定义为 UDP，结构如下：
+
+```c
+struct packet {
+    unsigned long magic;
+    unsigned long tag;
+    union {
+        unsigned int data[16];  // 整数化后数据
+        double data_raw[16];  // 原始数据
+    };
+};
+```
+
+当使用程序时，用户指定是否要将原始数据整数化后再提供给 eBPF。如果是这样，那么 union 取第一行，否则就是第二行。这分别对应以上两个方差分析算法实现版本。
+
+本小组的最终 [外部程序](https://github.com/OSH-2019/x-monthly-subscription/tree/master/code/taoky/suite) 见链接 github 网址。其中包括三部分：sender，receiver 和 measure。measure将在测时部分讲述。
+
+sender 将从指定文件里不断读入浮点数据，打包成用户期望的选项以及算法所规定的格式，加上 magic 和 tag 域后，打成一个数据包发送。整个存储原始浮点数据的文件会被完整地打成各个独立数据包，依次发送过去为网卡准备处理。
+
+**sender 所使用的参数为** `[发送数据包的 interface] [数据文件名] [是否整数化（0 是，1 否）]`
+
+receiver 接收从端口出来的所有数据包，但丢弃并非我们所发送的数据包（magic 域是否与规定的一致）。随后 receiver 根据收到的数据包内的数据（eBPF 程序只修改数据包的 tag，16 个数据没有改动）自行计算一下方差分析算法的状态划分结果，并与 eBPF 的结果 tag 比较。分两种情况：
+- 若发送的是原始浮点数据，就取数据包中的 double 完全用 double 计算。这种情形下，如果 eBPF 程序正确，那么依据上文中表格统计，正确率应约为 99%，剩下的 1% 是整数化后的精度误差引起的。也可以另作测试方法，也将原始 double 整数化之后再算结果与 tag 比较，这种情况应没有任何错误。
+- 若发送的是整数化之后的数据，就取数据包中的 unsigned int 并用整数化数据运算。这种情形下，完全没有任何错误才能保证 eBPF 程序正确。
+
+**receiver 所使用的参数为** `[接收数据包的 interface] [信息详细程度（0: 只显示 tag 是否与预期一致，1: 检查 magic 是否完全正确，输出接收到的数据内容，2: 额外显示接收的包的 hexdump）] [是否整数化（0 是，1 否）]`，**需注意，sender 和 receiver 和 eBPF 程序关于整数化的选项应当一致配合！**
+
+#### 手写汇编程序的正确性验证
+
+接下来分别测试外部整数化版本 [手写汇编 version 1](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v1.s) 和网卡内整数化版本 [手写汇编 version 2](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA_offload_handwrite_v2.s) 的正确性。
+
+转到两个汇编所在的目录，执行：
+
+```
+llvm-mc -triple bpf -filetype=obj -o ANOVA_offload_handwrite_v1.o ANOVA_offload_handwrite_v1.s
+llvm-mc -triple bpf -filetype=obj -o ANOVA_offload_handwrite_v2.o ANOVA_offload_handwrite_v2.s
+```
+
+生成两个 obj 文件。
+
+向网卡挂载（硬件卸载）version 1 的 eBPF 程序，执行命令：
+
+```
+sudo ip link set dev ens160np1 xdpoffload obj ANOVA_offload_handwrite_v1.o sec xdp
+```
+
+如果成功，执行 `ip link` 命令后，应在 `ens160np1` 下看到有 xdp 程序 id 挂载在端口上。
+
+![](files/conclusion/xdpload.PNG)
+
+下面转到 sender，receiver 程序所在的目录。执行：
+
+```
+make sender
+make receiver
+```
+
+随后开启两个终端，第一个终端先运行 receiver：
+
+```
+sudo ./receiver ens160np1 0 0 >answerbuf.txt
+```
+
+在另一个终端后执行 sender：
+
+```
+sudo ./sender ens160np0 data1.txt 0
+```
+
+注意整数化选项应一致，并与当前 eBPF version 配合。[data1.txt](https://github.com/OSH-2019/x-monthly-subscription/blob/master/code/thelitfire/ANOVA-example/data_000001SZ.txt) 是由老师提供的股票股价数据中的某一支。
+
+现可以终止 sender 和 receiver，在 answerbuf.txt 中查看结果。本小组最终测试出每行都是 `OK!`，这意味着验证通过，程序正确。
+
+![](files/conclusion/check-v1.PNG)
+
+接下来测试 version 2 的 eBPF 程序。首先将已挂载的 eBPF 程序解除，然后挂载新程序：
+
+```
+ip -force link set dev ens160np1 xdpoffload off
+sudo ip link set dev ens160np1 xdpoffload obj ANOVA_offload_handwrite_v2.o sec xdp
+```
+
+同样的方法运行：
+
+```
+sudo ./receiver ens160np1 0 1 >answerbuf2.txt
+sudo ./sender ens160np0 data1.txt 1
+```
+
+从 answerbuf2.txt 中能看到的结果是，只有极少数行显示 `AAAAA!`，剩下的都是 `OK!`，这与我们预期的一致，意味着 version 2 的程序也是正确的。下图是在文件中搜索错误信息的总行数 30，占总共 3047 行的约百分之一。
+
+![](files/conclusion/check-v2.PNG)
+
+#### eBPF 程序延迟测算
+
+本课题的另一关键目标就是获得更低的计算延迟。**我们定义的延迟是从数据包到达 eBPF 网卡起到它从网卡出来为止**。这里的延迟不仅仅包括纯粹 eBPF 程序处理的延迟，也同样包括数据包在网卡接口内部的传输延迟，将此也包括进去同样是为了注重实际的应用需求：如果挂载 eBPF 的通路本身就有很大的代价，谁会去使用这样的硬件架构呢？
+
+Netronome 官方向我们推荐了 [PROX](https://github.com/nvf-crucio/PROX) 作为服务器软件层延迟测试的方法。本小组曾对此做了尝试，甚至发现了这个项目的一个 [编译错误的问题](https://github.com/nvf-crucio/PROX/commit/305f09d6d9488d8bc3ab40a3955ad878c86780c6#r33680319)。
+
+![](files/conclusion/taokyTQL.png)
+
+但最终我们放弃了这个方法，原因在于：
+
+- PROX 依赖于 DPDK，DPDK 需要虚拟机提供支持，down 掉网卡并重新配置，需要对网络栈做处理，这可能会导致我们的 SSH 连接中断。
+- 我们使用网卡时需要特定的驱动，而 DPDK 可能会导致我们的 BPF 程序无法挂载。
+
+我们最终选择了刑凯老师推荐的 rdtsc 指令测算，并使用其替代 rdtscp 以防止 CPU 乱序执行等让测试结果失去意义并强制其保持同步。**rdtscp 将返回 CPU 内记录时钟周期数目的寄存器值，将两次调用之间的结果做差，可以得到一个相对差值，是中间消耗的时钟周期数目**。基本的过程为：
+
+1. 准备发送的数据。
+2. 执行 `rdtscp`。
+3. 发送包（`sendto()`）
+4. 接收包（`recvmsg()`）、判断是否是本程序发送的（判断 flag）
+5. 如果是，再执行 `rdtscp`，求差。
+6. 2 至 5 步执行 10 000 000 次，然后再执行 n 次，直到最小值恒定。
+
+编程结果为 [measure](https://github.com/OSH-2019/x-monthly-subscription/tree/master/code/taoky/suite) 程序。
+
+上述第 6 条中的重复执行次数有一定的讲究。**在 CPU 和 Linux 上，以时间为单位衡量程序效率，时常会受到操作系统的其他中断、调度等的干扰而使得结果产生相当大的波动，致使测试结果不准确。为了获得更好的效果，需要多次测算，并取最小值以希望消除上述波动误差。**但本小组实际应用的时候并不容易做到。我们最终采用的测试策略是：在午夜和凌晨几乎没有其他人使用服务器时，用唯一单独的 SSH 链接，远程运行几千万次测算并得到最小值作为我们的测试结果。千万级别则是本小组最大能允许的测试数目了（约半分钟测试十万组）。但结果依旧不尽如人意。
+
+然而这样测试出来的时钟周期数目包括了数据包在操作系统（网络栈、内核层、用户层）之间传输的时间，这部分时间要去掉。**方法是分别在挂载和不挂载 eBPF 程序的时候分别测算，两个测算结果（最小值）做差**，就可以去掉这部分时间。
+
+接下来测试 eBPF 程序延迟。
+
+首先给出 measure 程序的参数： `[接收数据包的 interface] [发送数据包的 interface] [n] [是否发送正确的数据包（1 为正确，0 为错误，错误时从 /dev/urandom 读取随机字符串）] [是否整数化（0 是，1 否）]`，若选择了发送正确数据，接下来需要提供 16 个浮点数。
+
+**第一步，测算不挂载 eBPF 程序的情况下，测得时钟周期数最小值。**
+
+```
+ip -force link set dev ens160np1 xdpoffload off
+sudo ./measure ens160np1 ens160np0 10000000 0 0
+```
+
+最终计算进行了 3000 0000 组，得到最终结果为 **118024**
+
+![](files/conclusion/measure-noebpf.PNG)
+
+**第二步，挂载 version 1 程序，测时钟周期最小值。**
+
+```
+ip -force link set dev ens160np1 xdpoffload off
+sudo ip link set dev ens160np1 xdpoffload obj ANOVA_offload_handwrite_v1.o sec xdp
+sudo ./measure ens160np1 ens160np0 10000000 1 0
+1.530 1.510 1.520 1.510 1.450 1.440 1.430 1.390 1.480 1.500 1.460 1.460 1.420 1.430 1.400 1.410
+```
+
+最终计算了 3000 0000 组，得到最终结果为 **124647**
+
+![](files/conclusion/measure-v1.PNG)
+
+**第三步，挂载 version 2 程序，测时钟周期最小值。**
+
+```
+ip -force link set dev ens160np1 xdpoffload off
+sudo ip link set dev ens160np1 xdpoffload obj ANOVA_offload_handwrite_v2.o sec xdp
+sudo ./measure ens160np1 ens160np0 10000000 1 1
+1.530 1.510 1.520 1.510 1.450 1.440 1.430 1.390 1.480 1.500 1.460 1.460 1.420 1.430 1.400 1.410
+```
+
+最终计算了 4000 0000 组，最终结果为 **116254**，**甚至小于第一步得到的结果**。
+
+![](files/conclusion/measure-v2.PNG)
+
+**由这样的实测结果，我们最终无法完全相信 rdtscp 指令给出的测试结果。本小组最终的结论是对延迟的数量级给出估计。并通过以往多次较少的组数的测试，认定延迟数量级为几千时钟周期。**
+
+***服务器使用的 CPU 为四核，其中一核的信息如下：***
+
+```
+[osh@localhost ~]$ cat /proc/cpuinfo
+processor       : 0
+vendor_id       : GenuineIntel
+cpu family      : 6
+model           : 62
+model name      : Intel(R) Xeon(R) CPU E5-2650 v2 @ 2.60GHz
+stepping        : 4
+microcode       : 0x42d
+cpu MHz         : 2599.999
+cache size      : 20480 KB
+physical id     : 0
+siblings        : 4
+core id         : 0
+cpu cores       : 4
+apicid          : 0
+initial apicid  : 0
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 13
+wp              : yes
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts nopl xtopology tsc_reliable nonstop_tsc cpuid pni pclmulqdq ssse3 cx16 pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm cpuid_fault pti ssbd ibrs ibpb stibp fsgsbase tsc_adjust smep arat flush_l1d arch_capabilities
+bugs            : cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds
+bogomips        : 5199.99
+clflush size    : 64
+cache_alignment : 64
+address sizes   : 42 bits physical, 48 bits virtual
+power management:
+```
+
+可以估计，每 1000 个指令周期约 384.6 ns，实际 CPU 可能变频，应会比 384.6 ns 更少。**所以最终估计的 eBPF 延迟约 1000 ns 左右，但这个估计的精度尚十分有限。**尽管如此，鉴于本小组编写的汇编代码较短，我们对实际延迟达到纳秒级别充满信心。
+
+值得总结的是：当需要精确到纳秒的时间数据，甚至是所需时间数据本身只有几千上万纳秒的情况下，不宜让测时过程经过太多操作系统部分。由于操作系统硬件、内核与用户各层间的诸多调度、管理、中断等不可充分预测的不确定因素，在小尺度下的测算时间数据波动可以相当大。对本小组的 measure 方法，我们通过用户层准备数据包，层层传递到网卡，再将网卡送出的数据包层层传回用户层，测得 rdtscp 周期数可从十万波动到二十多万。最优秀的小尺度测时应当基本不使用软件，在硬件层面直接测算，但本小组对服务器的控制一直通过软件层，并且鉴于本学期时间有限，配置如此的硬件环境还是十分困难。
+
+## eBPF 架构与方差分析算法总结
+
+尽管 eBPF 是优秀的包过滤与处理体系结构，在诸如 bpfiter 和网络安全等层面获得了出色的应用，但由于其指令级的局限性（特别在没有浮点数这一方面），以及 verifier 的严格检查（包括强制要求循环展开，限制函数调用的形式，栈空间限制等），使得 eBPF 实现复杂网络或数据处理算法的能力极为有限。更严重地，当硬件卸载到 Agilio SmartNIC 上时，由于缺乏对 eBPF 各种特性（如 map helper function，尾调用等）的充分支持，甚至于对 eBPF 指令级的部分不支持与更严格的 verifier 检查，程序不得不进行冗余写法以通过 verifier，而 4096 字节的指令数限制则成为最终、最核心、最难跨过的障碍。
+
+尽管 Agilio SmartNIC 有诸多各计算核心私有或公共的存储，并且优化了存储传输使得它不像冯诺依曼架构一样成为性能的瓶颈。但在多核心的高并发场景下，不得不特别关注对共有数据结构与存储区域的互斥与同步问题。解决它的最好方式是使得各个计算核的计算互相独立，具体方法是使各个计算核拥有统一且完整的算法代码，并注重数据包格式，保证每个数据包拥有一次完整算法计算所必需的全部数据。但对大数据包的处理算法依旧受限于 eBPF 指令数目限制。
+
+通用 clang 与 llvm 编译器往往不能产生能直接通过 verifier 的编译结果，但机器编译结果可以帮助我们窥见一些寄存器的使用特征等值得学习的地方。
+
+对 eBPF 程序延迟的测算应当包括数据包在进入网卡之后的传输延迟，这更符合人们对应用场景的需求。但对于纳秒级小尺度的时间测算，不宜通过操作系统等软件层面测时，更适合直接使用硬件。

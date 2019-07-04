@@ -59,7 +59,7 @@ struct packet {
 
 ## 发送与接收程序
 
-`sender` 和 `receiver` 对 fjw 的设计做了简单的包装。`sender` 读入一些浮点数，乘以 1024 后整数化打包发送。`receiver` 判断 magic 正确后接收，判断 `tag` 与预期值是否一致。
+`sender` 和 `receiver` 对 fjw 的设计做了简单的包装。`sender` 读入一些浮点数，乘以 16384 后整数化打包发送。`receiver` 判断 magic 正确后接收，判断 `tag` 与预期值是否一致。
 
 ## 使用说明
 

@@ -46,7 +46,7 @@ __inline__ uint64_t measure(int sock_send, int sock_recv, byte *send_buf, struct
 }
 
 int main(int argc, char** argv) {	
-    int check_times = 10000;
+    int check_times = 100000000;
     int correct_data = true;
     int raw = false;
     require_root();
@@ -105,15 +105,15 @@ int main(int argc, char** argv) {
 
     uint64_t min_time = UINT64_MAX;
     int total_t = 0;
-    for (int t = 0; t < 10000; t++) {
-        fprintf(stderr,"t = %d\n", ++total_t);
+    for (int t = 0; t < 100000000; t++) {
+        fprintf(stderr,"t = %d\t", ++total_t);
         uint64_t this_time = measure(sock_send, sock_recv, send_buf, target_addr, &msg, recv_buf);
         min_time = MIN(min_time, this_time);
     }
     uint64_t min_time_2 = min_time;
     for (;;) {
         for (int t = 0; t < check_times; t++) {
-            fprintf(stderr,"t = %d\n", ++total_t);
+            fprintf(stderr,"t = %d\t", ++total_t);
             uint64_t this_time = measure(sock_send, sock_recv, send_buf, target_addr, &msg, recv_buf);
             min_time_2 = MIN(min_time_2, this_time);
         }

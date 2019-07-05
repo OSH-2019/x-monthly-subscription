@@ -2,7 +2,7 @@
 
 # AlexNet 调研报告
 
-{:toc}
+[TOC]
 
 ## 一、 背景
 
@@ -439,7 +439,38 @@ Agilio SmartNIC 上有很多相对独立的流处理核心，可以给每个核�
 
 整个网络的数据包含两个主要部分：权重、偏置等参数（大型矩阵）以及当前正在计算的中间结果、梯度（向量）。前者需要更多的存储空间（MB 级别），并且在每次反向传播完成后才会修改。因此，将权重、偏置等参数存放在外部的 Adaptive Memory 中，而当前正在计算的数据记录在寄存器中。
 
-官方文档（“Microcode Standard Library Reference Manual”）提供有`buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()`......（见文档 2.24）。此外还提供了实现队列的一系列函数。
+官方文档（“Network Flow C Compiler User's Guide”）中给出了寄存器和内存的介绍：
+
+a). 寄存器
+
++ 通用寄存器General Purpose Register: GPR
++ 传输寄存器Transfer Registers: XFR
++ 邻居寄存器Next Neighbor Register: NN
++ 不定寄存器Volatile Register
+
+每一个 NFP 支持 256 个通用寄存器，这些寄存器被划分成两个 banks - A&B，这里需要注意的是每个指令周期内只能读取一个 bank 中的一个寄存器，如二元运算w = r1 + r2 , 若 r1 与 r2 在同一个 bank ，编译器会在编译时隐性增加数据转移指令将其中一个数据先移到不同 bank 。
+
+每个NFP还支持 512 个传输寄存器（其中256个 Transfer_In registers for I/O, 256 个 Transfer_Out registers for I/O ）
+
+并且每个NFP有128个邻居寄存器（NN）。NN 可以用于两个相邻NFP核心之间的通信，是我们需要重点关注的。NN有两种工作模式，可以对 CTX_ENABLE CSR 的NN_MODE 位进行修改。
+
+当 NN_MODE = 0 时，核心 A 不能向自己的NN中写数据而只能读，但可以向相邻的核心 B 的NN中写数据；NN_MODE=1时，核心A只能读写自己的NN。
+
+b). Memory
+
+包含了处理器核心内的 Local Memory 以及处理器外部的 ：
+
++ SRAM（为了向后兼容而留下）
++ MEM（包含IMEM，EMEM和CTM）
++ Cluster Local scratch（CLS）
+
+每个NPU都有一个私有的Local Memory，大小是1024 longwords。
+
+需要注意的是，寄存器与 Momory 数据交换时需要使用传输寄存器（XFR）
+
+XFR有 read XFR（作为Memory source），write XFR（作为Memory destination）（P45）。需要注意的是，C代码中涉及对内存数据的读写时，编译器会自动保证数据的同步性。（P44）
+
+此外在官方文档（“Microcode Standard Library Reference Manual”）中提供有`buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()`......（见文档 2.24）并且提供了实现队列的一系列函数。
 
 **数据计算**
 
@@ -447,7 +478,64 @@ Agilio SmartNIC 上有很多相对独立的流处理核心，可以给每个核�
 
 查阅文档并未发现有专门针对矩阵运算的函数，因此可以考虑利用硬件结构进行矩阵乘法的优化。注意到多个流处理核心可以并行工作而且计算完成后的到的是一个 n*1 的向量，因此可以并行计算矩阵乘法中每行的乘加计算，并直接存放到向量中元素对应位置，从而实现时间复杂度为 O(n) 的矩阵乘法。
 
-Softmax 的指数运算将 e 指数简化为 2 次幂，和 2 对数，在文档 2.15 提供了相应的除法和对数运算 `math_log2(out_result, in_arg, IN_ROUND)` 、`math_int_div(out_q, in_numerator, in_denominator)`。
+对于乘法计算，
+
+查阅文档（Micro-C Standard Library Reference Manual），以使用 intrinsic function 实现乘法运算：
+
+```C
+// 16b * 16b
+unsigned int multiply_16x16(unsigned int x, unsigned int y)
+
+//取低32b
+unsigned int multiply_32x32_lo(unsigned int x, unsigned int y)
+
+//取高32b
+unsigned int multiply_32x32_hi(unsigned int x, unsigned int y)
+```
+
+例如：
+$$
+y_1=w_1\times x_1+b_1\\
+   y_2=ReLU(y_1)
+$$
+
+```C
+__declspec(gp_reg) unsigned int y1,y2,w1,b1;
+
+y1= multiply_16x16(w1,x1)+b1;
+
+y2=(y1>0)?y1:0;
+```
+
+对于 Softmax 函数，可以将 e 指数对数运算简化为 2 次幂，以及 2 对数，在文档 2.15 提供了相应的除法和对数运算 `math_log2(out_result, in_arg, IN_ROUND)` 、`math_int_div(out_q, in_numerator, in_denominator)`。
+
+**核心之间数据共享与同步**
+
+我们知道，多个计算核心之间需要进行通信，比如下图中：$L_{11}$节点与ReLU节点需要通信
+
+![](files/alexnet/1.jpg)
+
+设计如下图：
+
+通信参考：
+
+1. Next Neighbor Register 
+2. 一种名叫 Reflector 的运算（UG_nfp6000_nfcc.pdf P46）
+
+![](files/alexnet/Cores.jpg)
+
+分析后发现：
+
+$( w_{11}^{1}，w^1_{21},b11)$这三个参数可以存储在核心A（$L_{11}节点$）的GPR中。因为这三个参数并未被其他节点所使用。
+
+   但还有一个核心计算先后顺序的问题。如下图:
+
+![](files/alexnet/coresteps.jpg)
+
+   信号量机制参考：
+
+   1. Signals*（UG_nfp6000_nfcc.pdf P46）*
+   2. Semaphore Library *(UG_nfp6000_nfcc.pdf )*
 
 **多核心协作**
 

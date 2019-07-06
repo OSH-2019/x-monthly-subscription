@@ -1,6 +1,8 @@
 # 结题报告
 {:.no_toc}
 
+建议在此链接阅读：<https://osh-2019.github.io/x-monthly-subscription/docs/conclusion>
+
 **Monthly Subscription Group**
 
 * TOC 

@@ -10,13 +10,13 @@
 
 **我们的项目是：**对计算机在数据处理上进行非冯化改造，绕过 CPU 与操作系统内核，在数据流架构的智能网卡上进行数据流驱动的实时处理。依据不同的处理需求，设计并实现不同的算法，将程序硬件卸载到智能网卡上以完成数据处理。目标是纳秒级的延迟。
 
-**我们涉及的数据处理需求包括：**基于方差分析（Analysis of Variance，ANOVA）算法的数据状态切分，和简化的 AlexNet 深层卷积神经网络。对于前者，我们完整实现了数据准备与接收程序，方差分析算法的 eBPF 硬件卸载代码，以及基于 `rdtscp` 指令的延迟测试，成功获得了正确划分结果并对延迟级别给出了估计。对于后者，我们完成了对算法本身的调研，以及容易编程的对算法的简化设计，同时尝试给每个步骤对应其所用的网卡硬件结构。
+**我们涉及的数据处理需求包括：**基于方差分析 (Analysis of Variance, ANOVA) 算法的数据状态切分，和简化的 AlexNet 深层卷积神经网络。对于前者，我们完整实现了数据准备与接收程序，方差分析算法的 eBPF 硬件卸载代码，以及基于 `rdtscp` 指令的延迟测试，成功获得了正确划分结果并对延迟级别给出了估计。对于后者，我们完成了对算法本身的调研，以及容易编程的对算法的简化设计，同时尝试给每个步骤对应其所用的网卡硬件结构。
 
 # 立项依据
 
-基于冯诺依曼架构的现代计算机，由于程序计数器（Program Counter）带来的硬件根本概念的串行性，处理大批量数据流的能力十分有限。尽管现代计算机利用指令级并行、多核多线程编程等带来了大幅的性能提升，但在例如服务器等的海量 IO 和数据并发场景下，冯氏结构与并行性之间的矛盾愈加显著。与此同时，CPU 与主存之间的速度不一致进一步限制了海量数据并发下的处理效率。
+基于冯诺依曼架构的现代计算机，由于程序计数器 (Program Counter) 带来的硬件根本概念的串行性，处理大批量数据流的能力十分有限。尽管现代计算机利用指令级并行、多核多线程编程等带来了大幅的性能提升，但在例如服务器等的海量 IO 和数据并发场景下，冯氏结构与并行性之间的矛盾愈加显著。与此同时，CPU 与主存之间的速度不一致进一步限制了海量数据并发下的处理效率。
 
-为了应对处理大量高速数据流需求，基于数据流驱动架构的智能网卡（SmartNIC）应运而生。区别于传统的控制流计算机，数据流计算机在原理上不存在 PC 寄存器，只有当一条或一组指令所需的操作数全部准备好时，才能激发相应指令的一次执行，执行结果又流向等待这一数据的下一条或一组指令，以驱动该条或该组指令的执行。因此，程序中各条指令的执行顺序仅仅是由指令间的数据依赖关系决定的。另一方面，数据流计算模型中没有传统的变量这一概念，它仅处理数据值，忽略存放数据的容器，从而具有纯函数的特点。
+为了应对处理大量高速数据流需求，基于数据流驱动架构的智能网卡 (SmartNIC) 应运而生。区别于传统的控制流计算机，数据流计算机在原理上不存在 PC 寄存器，只有当一条或一组指令所需的操作数全部准备好时，才能激发相应指令的一次执行，执行结果又流向等待这一数据的下一条或一组指令，以驱动该条或该组指令的执行。因此，程序中各条指令的执行顺序仅仅是由指令间的数据依赖关系决定的。另一方面，数据流计算模型中没有传统的变量这一概念，它仅处理数据值，忽略存放数据的容器，从而具有纯函数的特点。
 
 智能网卡同时具备可编程特性。eBPF 是一个简便轻量的，适于简单网络数据处理的虚拟 CPU 体系结构。智能网卡支持在一定的限制与映射方式下，硬件卸载 eBPF 程序到各个智能网卡核心上执行，以获得显著低于 Linux 内核和驱动层的延迟和比多核 CPU 更高的流处理速度。
 
@@ -472,7 +472,7 @@ power management:
 
 作为架构简单、配置硬件环境方便的 eBPF 硬件卸载难以胜任实现过程复杂，具有大量高级数学运算的算法，深度卷积神经网络 AlexNet 就是其中一例。
 
-幸运的是，eBPF 硬件卸载仅仅简单使用了 Agilio CX SmartNIC 的众多硬件结构的很小一部分。通过 Netronome 专门为 CX 智能网卡设计的软件开发工具（SDK），我们可以应用诸如 P4 和修改过的 C 语言（Managed C）直接对智能网卡编程、编译、调试和检测，并可通过诸多额外命令，指定代码块或数据区所使用的具体网卡硬件，诸如 Internal Memory、External Memory、额外的固有函数或指令等，支持 eBPF 所没有的数学运算。
+幸运的是，eBPF 硬件卸载仅仅简单使用了 Agilio CX SmartNIC 的众多硬件结构的很小一部分。通过 Netronome 专门为 CX 智能网卡设计的软件开发工具 (SDK)，我们可以应用诸如 P4 和修改过的 C 语言 (Managed C) 直接对智能网卡编程、编译、调试和检测，并可通过诸多额外命令，指定代码块或数据区所使用的具体网卡硬件，诸如 Internal Memory、External Memory、额外的固有函数或指令等，支持 eBPF 所没有的数学运算。
 
 本小组的最终希望是能通过 SDK 实现简单的 AlexNet。虽然我们给出了这种简化的算法设计，但 Agilio CX 的硬件架构繁多、功能众多而复杂，与之配对的 C 语言额外命令更是数不胜数，真正将其编程实现的困难不可小觑。**由于本学期时间紧迫，本小组对 AlexNet 在网卡上实现的最终进度限于对每个计算过程给出可对应的网卡硬件结构，但并未真正实现或验证这种对应的准确与可行性。**
 
@@ -488,7 +488,7 @@ power management:
 
 - 生物体中，信息以电信号形式在神经元之间传播。一个神经元的轴末梢可以多次分支，形成被称为突触的结构，一个神经元通过其数量众多的突触可与数以百计的其它神经元相连，创造出极为复杂的神经网络结构。
 
-- 计算机中，神经元被抽象为分层的计算节点（也常被称为神经元）。每个神经元的输入数据被乘上权重（weight），加上偏置（bias）后进行计算，再经激活函数（Activation function）进行非线性变换后输出。
+- 计算机中，神经元被抽象为分层的计算节点（也常被称为神经元）。每个神经元的输入数据被乘上权重 (weight)，加上偏置 (bias) 后进行计算，再经激活函数 (Activation function) 进行非线性变换后输出。
 
 $$
 \textrm{Output} = \textrm{Activation}(W·\vec X+\vec b)
@@ -523,13 +523,13 @@ AlexNet 属于深层卷积神经网络， 2015年在 ImageNet 图像识别挑战
 
 ### 矩阵的卷积
 
-在高等数学中，我们学过，函数 f(x)，g(x) 的卷积运算为：
+在高等数学中，我们学过，函数 $f(x)$，$g(x)$ 的卷积运算为：
 
 $$
 f(x)*g(x)= \int_{-\infty}^{\infty} f(x-t)g(t)dt
 $$
 
-其中 g(x) 可以称为该卷积运算的卷积核（kernel）。
+其中 g(x) 可以称为该卷积运算的卷积核 (kernel)。
 
 由于图像在计算机内部以矩阵形式存储，下面我们考虑卷积运算的矩阵形式。以下图为例，直观表示矩阵卷积的过程：k * k 大小的卷积核矩阵与 m * n 大小的输入矩阵进行对应位相乘并求和，得到的结果作为新矩阵中的一个元素。
 
@@ -541,7 +541,7 @@ $$
 
 ### 矩阵的池化
 
-池化常是卷积的下一步，也是一种矩阵运算。其目的是通过只保留主要特征、忽略次要特征减少数据量，优化计算复杂度。池化有重叠池化（overlapping pooling）、最大值池化（max pooling）等方式。
+池化常是卷积的下一步，也是一种矩阵运算。其目的是通过只保留主要特征、忽略次要特征减少数据量，优化计算复杂度。池化有重叠池化 (overlapping pooling)、最大值池化 (max pooling) 等方式。
 
 以 “最大值池化” 方式为例，如下图，将一个 4 * 4 大小的中间结果矩阵，通过对每个子矩阵取元素最大值，压缩为一个 2 * 2 大小的矩阵进行后续运算。
 
@@ -726,13 +726,13 @@ $$
 
 - 损失函数
 
-采用均方误差函数（Mean Square Error）：
+采用均方误差函数 (Mean Square Error)：
 
 $$
 f_{\textrm{Loss}}=\frac {\sum_{i=1}^N(1-S_i|_{i=\textrm{label}})^2} N
 $$
 
-其中 N 是一组训练样本（batch）的大小。
+其中 N 是一组训练样本 (batch) 的大小。
 
 - Softmax
 
@@ -800,7 +800,7 @@ __u8 **Convolution(__u8 *image[], __u8 *filter[]) {
     __u8 conv_result[4][4];
     for (int i = 0; i < 16; i++) { // 卷积核移动 
         // 矩阵乘法
-        for(int j = 0; j < 5; j++) {
+        for (int j = 0; j < 5; j++) {
             for (int k = 0; k < 5; k++) {
                 result[i / 4][i % 4] += filter[j][k] * image[i / 4 + k][i % 4 + j];
             }
@@ -851,7 +851,7 @@ int *Softmax(__u8 neuron[]) {
     int probability[10];
     int sum = 0;
     for (int i = 0; i < 10; i++) {
-        sum += exp(neuron[i]); // 需要改成2
+        sum += exp(neuron[i]); // 需要改成 2
     }
     for (int i = 0; i < 10; i++) {
         probability[i] = exp(neuron[i]) / sum;
@@ -864,7 +864,8 @@ int Argmax(int x[], int n) {
     int max = 0, arg;
     for (int i = 0; i < n; i++) {
         if (x[i] > max) {
-            max=x[i]; arg=i;
+            max = x[i]; 
+            arg = i;
         }
     }
     return arg;
@@ -875,13 +876,13 @@ int main() {
     __u8 image[8][8]; 
 
     /* input image */
-    //偏置，是不需要训练（？）的参数，先设置为 0.1
-    __u8 Bias[4][4] = {0.1,...}; 
-    //学习率，超参数，人为设定，比如说 0.4
+    // 偏置，是不需要训练 (?) 的参数，先设置为 0.1
+    __u8 Bias[4][4] = {0.1, ...}; 
+    // 学习率，超参数，人为设定，比如说 0.4
     const __u8 eta = 0.4;  
-    //卷积核初始化，可以全赋值为 1
-    __u8 filter[5][5 = random_initial();
-    __u8 FCL_filter1,...9[2][2] = random_initial();
+    // 卷积核初始化，可以全赋值为 1
+    __u8 filter[5][5] = random_initial();
+    __u8 FCL_filter0[2][2], ..., FCL_filter9[2][2] = random_initial();
 
     // 若对数字识别：result = 0, 1, 2, ..., 9
     // 搭建神经网络：
@@ -895,14 +896,14 @@ int main() {
     /* 训练：进行验证，误差反向传播，使用BP算法训练参数 */
 
     // 误差可以采用均方误差
-    // 每训练一组（batch），一组 n 张图，计算一次 loss，然后用 BP 算法调参
-    double loss = (sum((result - true_value) * (result - true_value)) / n;
+    // 每训练一组 (batch)，一组 n 张图，计算一次 loss，然后用 BP 算法调参
+    double loss = sum((result - true_value) * (result - true_value)) / n;
 
     // BP 算法，需事先把偏导式写出
     // 这里要调整的参数有：卷积核 5x5=25 + FCL 卷积核 10x2x2=40 =65个参数
     wi -= eta * (A * wi + B * wj + C * wk + ...);  
 
-    printf("Pridiction is %d\n", result);
+    printf("Prediction is %d\n", result);
     return 0;
 }
 ```
@@ -917,21 +918,21 @@ Agilio CX SmartNIC 上有很多相对独立的流处理核心，可以给每个�
 
 ### 数据存储与共享
 
-（UG_nfp6000_nfcc.pdf P37始）Netronome Network Flow Processor 6xxx（以下简称 NFP）提供的数据存储位置有：
+(UG_nfp6000_nfcc.pdf, P37 始) Netronome Network Flow Processor 6xxx（以下简称 NFP）提供的数据存储位置有：
 
 #### 寄存器数据存储
 
-寄存器分为：通用寄存器 General Purpose Register（GPR）；传输寄存器 Transfer Registers（XFR）；邻居寄存器 Next Neighbor Register（NN）；不定寄存器 Volatile Register。
+寄存器分为：通用寄存器 General Purpose Register (GPR)；传输寄存器 Transfer Registers (XFR)；邻居寄存器 Next Neighbor Register (NN)；不定寄存器 Volatile Register。
 
 每一个 NFP 支持 256 个通用寄存器，这些寄存器被划分成两个分区 A 和 B，需要注意的是**每个指令周期内只能读取一个分区中的一个寄存器**，如二元运算 ` w = r1 + r2 ` ，若 r1 与 r2 在同一个区，编译器会在编译时隐性增加数据转移指令将其中一个数据先移到不同区。
 
-每个 NFP 还支持 512 个传输寄存器（其中 256 个 Transfer_In registers for I/O，256 个 Transfer_Out registers for I/O）。传输寄存器用来取 Memory（下面介绍）中的数据到寄存器里，亦分为 read XFR（作为Memory source）和 write XFR（作为Memory destination）。
+每个 NFP 还支持 512 个传输寄存器（其中 256 个 Transfer_In registers for I/O，256 个 Transfer_Out registers for I/O）。传输寄存器用来取 Memory（下面介绍）中的数据到寄存器里，亦分为 read XFR (作为 Memory source) 和 write XFR (作为 Memory destination)。
 
-并且每个 NFP 有 128 个邻居寄存器（NN）。**NN 可以用于两个相邻 NFP 核心之间的通信。是我们需要重点关注的。**NN 有两种工作模式，可以对 CTX_ENABLE CSR 的 NN_MODE 位进行修改：当 NN_MODE = 0 时，核心 A 不能向自己的 NN 中写数据而只能读，但可以向相邻的核心 B 的 NN 中写数据；NN_MODE = 1 时，核心 A 只能读写自己的 NN。
+并且每个 NFP 有 128 个邻居寄存器 (NN)。**NN 可以用于两个相邻 NFP 核心之间的通信。是我们需要重点关注的。**NN 有两种工作模式，可以对 CTX_ENABLE CSR 的 NN_MODE 位进行修改：当 NN_MODE = 0 时，核心 A 不能向自己的 NN 中写数据而只能读，但可以向相邻的核心 B 的 NN 中写数据；NN_MODE = 1 时，核心 A 只能读写自己的 NN。
 
-#### 内存（Memory）数据存储
+#### 内存 (Memory) 数据存储
 
-Memory分为：每个 NFP 内部的 Local Memory，外部的 SRAM、MEM（包含 IMEM，EMEM 和 CTM）、Cluster Local Scratch（CLS）。
+Memory分为：每个 NFP 内部的 Local Memory，外部的 SRAM、MEM（包含 IMEM，EMEM 和 CTM）、Cluster Local Scratch (CLS)。
 
 Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
@@ -941,11 +942,11 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 整个网络的数据包含两个主要部分：权重、偏置等参数（大型矩阵）以及当前正在计算的中间结果、梯度（向量）。前者需要更多的存储空间（MB 级别），并且在每次反向传播完成后才会修改。因此，将权重、偏置等参数存放在外部的 Adaptive Memory 中，而当前正在计算的数据记录在寄存器中。
 
-官方文档（“Microcode Standard Library Reference Manual”）提供有`buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()`......（见文档 2.24）。此外还提供了实现队列的一系列函数。
+官方文档 (“Microcode Standard Library Reference Manual”) 提供有`buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()`......（见文档 2.24）。此外还提供了实现队列的一系列函数。
 
 #### 核心之间数据的共享和同步
 
-在我们的简化 AlexNet 设计里，多个计算核心之间需要进行通信，比如下图中：$L_{11}$节点与 ReLU 节点需要通信。
+在我们的简化 AlexNet 设计里，多个计算核心之间需要进行通信，比如下图中：$L_{11}$ 节点与 ReLU 节点需要通信。
 
 ![](files/conclusion/1.jpg)
 
@@ -953,13 +954,13 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 ![](files/conclusion/Cores.jpg)
 
-使用的通信技术包括：Next Neighbor Register，以及一种名叫 Reflector 的运算*（UG_nfp6000_nfcc.pdf P46）*
+使用的通信技术包括：Next Neighbor Register，以及一种名叫 Reflector 的运算 *(UG_nfp6000_nfcc.pdf P46)*
 
 进一步分析简化设计中的特点，$(w_{11}^{1}, w^1\_{21}, b11)$ 这三个参数可以存储在核心 A（$L\_{11}$ 节点）的 GPR 中，因为这三个参数并未被其他节点所使用。
 
 但我们依旧需要控制各个核心计算的先后顺序——这是 AlexNet 不同层的先后顺序。**SDK 允许我们编程信号量和信号**，包括：
 
-- Signals*（UG_nfp6000_nfcc.pdf P46）*
+- Signals *(UG_nfp6000_nfcc.pdf, P46)*
 - Semaphore Library *(UG_nfp6000_nfcc.pdf)*
 
 ![](files/conclusion/coresteps.jpg)
@@ -970,7 +971,7 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 #### 乘法内置函数
 
-根据 Micro-C lib 文档*（RM_nfp6000_microclib.pdf  P690 始）*，可以使用如下 intrinsic function（内置函数）在 Netronome Network Flow Processor 6xxx 实现 16 * 16 的乘法运算
+根据 Micro-C lib 文档 *(RM_nfp6000_microclib.pdf, P690 始)*，可以使用如下 intrinsic function（内置函数）在 Netronome Network Flow Processor 6xxx 实现 16 * 16 的乘法运算
 
 ```c
 unsigned int multiply_16x16(unsigned int x, unsigned int y)
@@ -993,16 +994,16 @@ y_2=ReLU(y_1)
 $$
 
 ```c
-__declspec(gp_reg) unsigned int y1,y2,w1,b1;
+__declspec(gp_reg) unsigned int y1, y2, w1, b1;
 
-y1 = multiply_16x16(w1,x1)+b1;
+y1 = multiply_16x16(w1, x1) + b1;
 
 y2 = (y1 > 0) ? y1 : 0;
 ```
 
 #### 多个流处理核心加速矩阵乘法
 
-考虑利用硬件结构进行矩阵乘法的优化。注意到多个流处理核心可以并行工作而且计算完成后的到的是一个 n*1 的向量，因此可以并行计算矩阵乘法中每行的乘加计算，并直接存放到向量中元素对应位置，从而实现时间复杂度为 O(n) 的矩阵乘法。
+考虑利用硬件结构进行矩阵乘法的优化。注意到多个流处理核心可以并行工作而且计算完成后的到的是一个 n*1 的向量，因此可以并行计算矩阵乘法中每行的乘加计算，并直接存放到向量中元素对应位置，从而实现时间复杂度为 $O(n)$ 的矩阵乘法。
 
 #### 对数运算和除法运算
 

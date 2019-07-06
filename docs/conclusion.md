@@ -787,119 +787,123 @@ $$
 ### 简化结构的伪代码示例
 
 ```c
-//输入：8x8(每个像素点0-255,__u8)(只有一层的灰度图)
+// 输入：8x8 (每个像素点 0-255, __u8)(只有一层的灰度图)
 //  __u8 image[8][8];
-//卷积核，大小暂定5*5
-//  __u8 filter[5][5]= random_initial(); //随机初始化
+// 卷积核，大小暂定 5x5
+//  __u8 filter[5][5] = random_initial(); // 随机初始化
 
-//卷积：
-__u8 ** Convolution(__u8 *image[],__u8 *filter[]){
-    //卷积核 大小5x5，步长1，这样卷积出来的结果是一个4x4的矩阵
-    //卷积核中25个参数是要训练得到的
-        __u8 conv_result[4][4]
-    for(int i=0;i<16){ //卷积核移动 
-        //矩阵乘法
-        for(int j=0;j<5;j++){
-            for(int k=0;k<5;k++){
-                result[i/4][i%4]+=filter[j][k]*image[i/4+k][i%4+j];
+// 卷积：
+__u8 **Convolution(__u8 *image[], __u8 *filter[]) {
+    // 卷积核 大小 5x5，步长 1，这样卷积出来的结果是一个 4x4 的矩阵
+    // 卷积核中 25 个参数是要训练得到的
+
+    __u8 conv_result[4][4];
+    for (int i = 0; i < 16; i++) { // 卷积核移动 
+        // 矩阵乘法
+        for(int j = 0; j < 5; j++) {
+            for (int k = 0; k < 5; k++) {
+                result[i / 4][i % 4] += filter[j][k] * image[i / 4 + k][i % 4 + j];
             }
         }
     }
 	return conv_result;
 }
 
-//ReLU 激活函数
-__u8** ReLU(__u8 *x[],int n){
+// ReLU 激活函数
+__u8 **ReLU(__u8 *x[], int n) {
     __u8 result[n][n];
-    for(int i=0;i<n;i++){
-        for(int j=0;j<n;j++){
-            result[i][j]=(x[i][j]>0)?x[i][j]:0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            result[i][j] = (x[i][j] > 0) ? x[i][j] : 0;
         }
     }
     return result;
 }
 
-//池化：AlexNet中采用最大值池化
-//卷积的结果是一个4x4的矩阵，池化后变成2x2的
-__u8 ** Pooling(__u8 *conv_result[]){
+// 池化：AlexNet 中采用最大值池化
+// 卷积的结果是一个 4x4 的矩阵，池化后变成 2x2 的
+__u8 **Pooling(__u8 *conv_result[]) {
     __u8 pool_result[2][2];
-    for(int i=0;i<2;i++){
-        for(int j=0;j<2;j++){
-            pool_result[i][j]=max(
-            conv_result[2*i][2*j],
-            conv_result[2*i+1][2*j],
-            conv_result[2*i][2*j+1],
-            conv_result[2*i+1][2*j+1]);
+    for (int i = 0; i < 2; i++) {
+        for(int j = 0; j < 2; j++) {
+            pool_result[i][j] = max(
+                conv_result[2 * i][2 * j],
+                conv_result[2 * i + 1][2 * j],
+                conv_result[2 * i][2 * j + 1],
+                conv_result[2 * i + 1][2 * j + 1]);
         }
     }
     return pool_result;
 }
 
-//全连接层, 返回值是一维数组
-__u8 *FullConnectLayer(__u8 *pool_result[],__u8 FCL_filter0* [], __u8 FCL_filter2* [], ..., __u8 FCL_filter9* []){
-    //全连接层应该有10个神经元：对应数字识别
+// 全连接层, 返回值是一维数组
+__u8 *FullConnectLayer(__u8 *pool_result[], __u8 FCL_filter0* [], __u8 FCL_filter2* [], ..., __u8 FCL_filter9* []){
+    // 全连接层应该有10个神经元：对应数字识别
     __u8 neuron[10];
-    for(i=0;i<10;i++){
-	   Neuron[i]=**Convolution(pool_result,FCL_filter{i});
+    for (int i = 0; i < 10; i++) {
+	   neuron[i] = **Convolution(pool_result, FCL_filter{i});
     }
     return neuron;
 }
 
-//Softmax层，输出0-9的识别概率
-int *Softmax(__u8 neuron[]){
+// Softmax 层，输出 0-9 的识别概率
+int *Softmax(__u8 neuron[]) {
     int probability[10];
-    int sum=0;
-    for(int i=0;i<10;i++){
-        sum+=exp(neuron[i]); //需要改成2
+    int sum = 0;
+    for (int i = 0; i < 10; i++) {
+        sum += exp(neuron[i]); // 需要改成2
     }
-    for(int i=0;i<10;i++){
-        probability[i]=exp(neuron[i])/sum;
+    for (int i = 0; i < 10; i++) {
+        probability[i] = exp(neuron[i]) / sum;
     }
     return probability;
 }
 
-//选出概率最大的作为预测结果
-int Argmax(int x[],int n){
-    int max=0,arg;
-    for(int i=0;i<n;i++){
-        if(x[i]>max){max=x[i];arg=i;}
+// 选出概率最大的作为预测结果
+int Argmax(int x[], int n) {
+    int max = 0, arg;
+    for (int i = 0; i < n; i++) {
+        if (x[i] > max) {
+            max=x[i]; arg=i;
+        }
     }
     return arg;
 }
 
-int main(){
-    //一张图片
+int main() {
+    // 一张图片
     __u8 image[8][8]; 
 
     /* input image */
-    //偏置，是不需要训练（？）的参数,先设置为0.1
-    __u8 Bias[4][4]={0.1,...}; 
-    //学习率，超参数，人为设定，比如说0.4
-    const __u8 eta=0.4;  
-    //卷积核初始化，可以全赋值为1
-    __u8 filter[5][5]= random_initial();
-    __u8 FCL_filter1,...9[2][2]= random_initial();
+    //偏置，是不需要训练（？）的参数，先设置为 0.1
+    __u8 Bias[4][4] = {0.1,...}; 
+    //学习率，超参数，人为设定，比如说 0.4
+    const __u8 eta = 0.4;  
+    //卷积核初始化，可以全赋值为 1
+    __u8 filter[5][5 = random_initial();
+    __u8 FCL_filter1,...9[2][2] = random_initial();
 
-    //若对数字识别：result=0,1,2,...,9
-    //搭建神经网络：
-    int result=Argmax(
-        Softmax(
-        FullConnectLayer(
-        Pooling(ReLU(Convolution(image,filter)+Bias,4))
-    	FCL_filter0,...,FCL_filter9)),10
-        );
+    // 若对数字识别：result = 0, 1, 2, ..., 9
+    // 搭建神经网络：
+    int result = Argmax(
+                    Softmax(
+                        FullConnectLayer(
+                            Pooling(ReLU(Convolution(image,filter) + Bias, 4)),
+    	                    FCL_filter0, ..., FCL_filter9)), 10
+                );
 
-    /*训练：进行验证，误差反向传播，使用BP算法训练参数 */
+    /* 训练：进行验证，误差反向传播，使用BP算法训练参数 */
 
-    //误差可以采用均方误差
-    //每训练一组（batch），一组n张图，计算一次loss，然后用BP算法调参
-    double loss=(sum((result-true_value)*(result-true_value))/n;
+    // 误差可以采用均方误差
+    // 每训练一组（batch），一组 n 张图，计算一次 loss，然后用 BP 算法调参
+    double loss = (sum((result - true_value) * (result - true_value)) / n;
 
-    //BP 算法，需事先把偏导式写出
-    //这里要调整的参数有：卷积核5x5=25 + FCL卷积核 10x2x2=40 =65个参数
-    wi-=eta*(A*wi+B*wj+C*wk+...);  
+    // BP 算法，需事先把偏导式写出
+    // 这里要调整的参数有：卷积核 5x5=25 + FCL 卷积核 10x2x2=40 =65个参数
+    wi -= eta * (A * wi + B * wj + C * wk + ...);  
 
-    printf("Pridiction is %d\n",result);
+    printf("Pridiction is %d\n", result);
+    return 0;
 }
 ```
 

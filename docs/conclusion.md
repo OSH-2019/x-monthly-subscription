@@ -1,6 +1,8 @@
 # 结题报告
 {:.no_toc}
 
+建议在此链接阅读：<https://osh-2019.github.io/x-monthly-subscription/docs/conclusion>
+
 **Monthly Subscription Group**
 
 * TOC 
@@ -42,7 +44,7 @@ Netronome 公司生产的 Agilio CX 智能网卡同时能直接支持 P4 和 Mic
 
 统计学上有理由认为：相同的状态所对应的各个数据应当具有相同的统计分布。当新的一段数据到来时，通过一定的算法，可以判断该段数据是否符合前一段数据的统计分布，进而决定是否切分状态。
 
-方差分析算法是基于“时间滑动窗口”的数据分析模式。数据窗口是一个固定时间跨度或固定数据个数的连续时间内的数据段。窗口滑动是指窗口相对时间向后滑动，窗口丢弃时间较旧的若干数据，替换为时间更新的数据，得到一个新的窗口。对于固定时间跨度的窗口，窗口每次滑动固定的时间；对固定数据个数的窗口，每次滑动固定的数据数目。两个相邻的窗口之间有重叠率，两者之间重叠固定百分比的时间跨度（或数据个数），而余下的是新的时间段（新的数据段）。窗口的（数据或时间）跨度，重叠率等是方差分析的关键参数，它决定了划分算法的最终精确程度，但不是算法的本质核心。
+方差分析算法是基于“时间滑动窗口”的数据分析模式。数据窗口是一个固定时间跨度或固定数据个数的连续时间内的数据段。窗口滑动是指窗口相对时间向后滑动，窗口丢弃时间较旧的若干数据，替换为时间更新的数据，得到一个新的窗口。对于固定时间跨度的窗口，窗口每次滑动固定的时间；对固定数据个数的窗口，每次滑动固定的数据数目。两个相邻的窗口之间有重叠率，两者之间重叠固定百分比的时间跨度（或数据个数），而余下的是新的时间段（新的数据段）。窗口的（数据或时间）跨度，重叠率等是方差分析的关键参数，它决定了划分算法的最终精确程度，但不是算法的核心。
 
 方差分析算法认为，两个被比较的窗口（可以是相邻窗口，有数据的重叠；也可以没有数据重叠，这也是算法“参数”设计的一部分），如果属于相同的状态，那么具有相同的数据统计分布。判断二者是否是同一分布的方法是切比雪夫不等式（以下直接简称为“不等式” ）：
 
@@ -504,7 +506,7 @@ $$
 
 通过仿照与抽象生物的视知觉 (visual perceptual) 结构，研究者们提出了卷积神经网络 (CNN, Convolutional Neural Network)，它是一种包含卷积运算的深度前馈神经网络。其结构上的独特设计使得它在信息提取与优化计算性能上优势明显，被广泛应用于图像处理等领域。
 
-AlexNet 属于深层卷积神经网络， 2015年在 ImageNet 图像识别挑战赛中大放异彩，点燃了研究者们对于深度神经网络算法的热情，在人工智能的发展历程上具有里程碑意义。
+AlexNet 属于深层卷积神经网络， 2015 年在 ImageNet 图像识别挑战赛中大放异彩，点燃了研究者们对于深度神经网络算法的热情，在人工智能的发展历程上具有里程碑意义。
 
 区别于此前的神经网络架构，AlexNet 有如下特性：
 
@@ -529,9 +531,9 @@ $$
 f(x)*g(x)= \int_{-\infty}^{\infty} f(x-t)g(t)dt
 $$
 
-其中 g(x) 可以称为该卷积运算的卷积核 (kernel)。
+其中 $g(x)$ 可以称为该卷积运算的卷积核 (kernel)。
 
-由于图像在计算机内部以矩阵形式存储，下面我们考虑卷积运算的矩阵形式。以下图为例，直观表示矩阵卷积的过程：k * k 大小的卷积核矩阵与 m * n 大小的输入矩阵进行对应位相乘并求和，得到的结果作为新矩阵中的一个元素。
+由于图像在计算机内部以矩阵形式存储，下面我们考虑卷积运算的矩阵形式。以下图为例，直观表示矩阵卷积的过程：$k \times k$ 大小的卷积核矩阵与 $m \times n$ 大小的输入矩阵进行对应位相乘并求和，得到的结果作为新矩阵中的一个元素。
 
 ![](files/alexnet/卷积.jpg)
 
@@ -543,7 +545,7 @@ $$
 
 池化常是卷积的下一步，也是一种矩阵运算。其目的是通过只保留主要特征、忽略次要特征减少数据量，优化计算复杂度。池化有重叠池化 (overlapping pooling)、最大值池化 (max pooling) 等方式。
 
-以 “最大值池化” 方式为例，如下图，将一个 4 * 4 大小的中间结果矩阵，通过对每个子矩阵取元素最大值，压缩为一个 2 * 2 大小的矩阵进行后续运算。
+以 “最大值池化” 方式为例，如下图，将一个 $4 \times 4$ 大小的中间结果矩阵，通过对每个子矩阵取元素最大值，压缩为一个 $2 \times 2$ 大小的矩阵进行后续运算。
 
 ![](files/alexnet/pooling.png)
 
@@ -567,7 +569,7 @@ $$
 \textrm{Softmax}(x_i)=\frac {e^{x_i}} {\Sigma_{j=0}^n e^{x_j}} \in [0,1]
 $$
 
-一种方便的而不影响原则的简化是将底数从 e 变为 2，即：
+一种方便的而不影响原则的简化是将底数从 $e$ 变为 2，即：
 
 $$
 \textrm{Softmax}^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
@@ -671,7 +673,7 @@ $$
 LP_{ij}^{\textrm{new}} = LP_{ij} - \eta \cdot \frac{\partial \textrm{Loss}}{\partial LP_{ij}}
 $$
 
-其中 $\eta$ 为 学习率。
+其中 $\eta$ 为学习率。
 
 ## AlexNet 的实际结构与简化结构
 
@@ -736,7 +738,7 @@ $$
 
 - Softmax
 
-如前所述，使用 2 代替公式中的 e：
+如前所述，使用 2 代替公式中的 $e$：
 
 $$
 \textrm{Softmax}^{*}(x_i)=\frac {2^{x_i}} {\Sigma_{j=0}^n 2^{x_j}} \in [0,1]
@@ -942,7 +944,7 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 整个网络的数据包含两个主要部分：权重、偏置等参数（大型矩阵）以及当前正在计算的中间结果、梯度（向量）。前者需要更多的存储空间（MB 级别），并且在每次反向传播完成后才会修改。因此，将权重、偏置等参数存放在外部的 Adaptive Memory 中，而当前正在计算的数据记录在寄存器中。
 
-官方文档 (“Microcode Standard Library Reference Manual”) 提供有`buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()`......（见文档 2.24）。此外还提供了实现队列的一系列函数。
+官方文档 (“Microcode Standard Library Reference Manual”) 提供有 `buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()` 等（见文档 2.24）。此外还提供了实现队列的一系列函数。
 
 #### 核心之间数据的共享和同步
 
@@ -954,14 +956,14 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 ![](files/conclusion/Cores.jpg)
 
-使用的通信技术包括：Next Neighbor Register，以及一种名叫 Reflector 的运算 *(UG_nfp6000_nfcc.pdf P46)*
+使用的通信技术包括 Next Neighbor Register，以及一种名叫 Reflector 的运算 (UG_nfp6000_nfcc.pdf, P46)
 
-进一步分析简化设计中的特点，$(w_{11}^{1}, w^1\_{21}, b11)$ 这三个参数可以存储在核心 A（$L\_{11}$ 节点）的 GPR 中，因为这三个参数并未被其他节点所使用。
+进一步分析简化设计中的特点，$(w_{11}^{1}, w^1\_{21}, b\_{11})$ 这三个参数可以存储在核心 A（$L\_{11}$ 节点）的 GPR 中，因为这三个参数并未被其他节点所使用。
 
 但我们依旧需要控制各个核心计算的先后顺序——这是 AlexNet 不同层的先后顺序。**SDK 允许我们编程信号量和信号**，包括：
 
-- Signals *(UG_nfp6000_nfcc.pdf, P46)*
-- Semaphore Library *(UG_nfp6000_nfcc.pdf)*
+- Signals (UG_nfp6000_nfcc.pdf, P46)
+- Semaphore Library (UG_nfp6000_nfcc.pdf)
 
 ![](files/conclusion/coresteps.jpg)
 
@@ -971,26 +973,27 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 #### 乘法内置函数
 
-根据 Micro-C lib 文档 *(RM_nfp6000_microclib.pdf, P690 始)*，可以使用如下 intrinsic function（内置函数）在 Netronome Network Flow Processor 6xxx 实现 16 * 16 的乘法运算
+根据 Micro-C 标准库文档 (RM_nfp6000_microclib.pdf, P690 始)，可以使用如下 intrinsic function（内置函数）在 Netronome Network Flow Processor 6xxx 实现 16 位乘 16 位数的乘法运算：
 
 ```c
 unsigned int multiply_16x16(unsigned int x, unsigned int y)
 ```
 
-也可以实现 32 * 32 的乘法运算
+也可以实现 32 位乘 32 位的乘法运算：
 
 ```c
-//取低32b
+// 取低32 bits
 unsigned int multiply_32x32_lo(unsigned int x, unsigned int y)
 
-//取高32b
+// 取高32 bits
 unsigned int multiply_32x32_hi(unsigned int x, unsigned int y)
 ```
 
 例：
+
 $$
 y_1=w_1\times x_1+b_1\\
-y_2=ReLU(y_1)
+y_2=\textrm{ReLU}(y_1)
 $$
 
 ```c
@@ -1003,11 +1006,11 @@ y2 = (y1 > 0) ? y1 : 0;
 
 #### 多个流处理核心加速矩阵乘法
 
-考虑利用硬件结构进行矩阵乘法的优化。注意到多个流处理核心可以并行工作而且计算完成后的到的是一个 n*1 的向量，因此可以并行计算矩阵乘法中每行的乘加计算，并直接存放到向量中元素对应位置，从而实现时间复杂度为 $O(n)$ 的矩阵乘法。
+考虑利用硬件结构进行矩阵乘法的优化。注意到多个流处理核心可以并行工作而且计算完成后的到的是一个 $n \times 1$ 的向量，因此可以并行计算矩阵乘法中每行的乘加计算，并直接存放到向量中元素对应位置，从而实现时间复杂度为 $O(n)$ 的矩阵乘法。
 
 #### 对数运算和除法运算
 
-Microcode Standard Library Reference Manual 文档 2.15 提供了相应的除法和对数运算 `math_log2(out_result, in_arg, IN_ROUND)` 、`math_int_div(out_q, in_numerator, in_denominator)`。
+Microcode Standard Library Reference Manual 文档 2.15 提供了相应的除法和对数运算 `math_log2(out_result, in_arg, IN_ROUND)`, `math_int_div(out_q, in_numerator, in_denominator)`。
 
 ### 多核心协作机制
 
@@ -1019,7 +1022,7 @@ Microcode Standard Library Reference Manual 文档 2.15 提供了相应的除法
 
 ## AlexNet 硬件卸载调研总结
 
-完整的深度卷积神经网络 AlexNet 由于参数过大、过程过多而极大增大了实现复杂性。本小组最终决定针对 8 * 8 的灰度图进行简化 AlexNet 的设计与实现调研。
+完整的深度卷积神经网络 AlexNet 由于参数过大、过程过多而极大增大了实现复杂性。本小组最终决定针对 $8 \times 8$ 的灰度图进行简化 AlexNet 的设计与实现调研。
 
 为了充分利用 60 个 NPU 计算核心，除了必定映射到神经网络节点的一部分以外，其他核心应依照多核心协作设计方式，用于处理诸如 ReLU 等 AlexNet 中特定的过程，或者加速梯度下降、矩阵乘法等允许分块处理的计算过程。
 
@@ -1065,7 +1068,7 @@ verifier 是 eBPF 程序硬件卸载的最大障碍，而 `clang` 等编译器�
 
 高一凡学长与我们远程邮件联系，在 eBPF 编写途中答疑。
 
-Netronome 的工程师们在 eBPF 硬件卸载编译环境、map 支持、调试问题上给予了相当大的帮助。
+Netronome 的工程师们在 eBPF 硬件卸载编译环境、Map 支持、调试问题上给予了相当大的帮助。
 
 在此本小组成员一并表示感谢。
 

@@ -1,5 +1,6 @@
 // modified from fjw's code
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sched.h>
 
 #include "fatal_posix.h"
 #include "prepare.h"
@@ -45,11 +47,22 @@ __inline__ uint64_t measure(int sock_send, int sock_recv, byte *send_buf, struct
     return t2 - t1;
 }
 
+void set_cpu_one_core(void) {
+    cpu_set_t set;
+    CPU_ZERO(&set);
+    CPU_SET(0, &set);  // always use the first cpu core
+    if (sched_setaffinity(getpid(), sizeof(set), &set) == -1) {
+        perror("sched_setaffinity()");
+        exit(-1);
+    }
+}
+
 int main(int argc, char** argv) {	
     int check_times = 10000000;
     int correct_data = true;
     int raw = false;
     require_root();
+    set_cpu_one_core();
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
         fprintf(stderr, "Usage: %s [RECV ITH] [SEND ITH] [TEST CHECK TIMES] [CORRECT? (1/0)] [RAW? (1/0)]\n", argv[0]);
         exit(-1);

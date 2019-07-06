@@ -2,7 +2,7 @@
 
 **Monthly Subscription Group**
 
-[TOC]
+{:toc}
 
 # 项目介绍
 
@@ -948,7 +948,7 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 但我们依旧需要控制各个核心计算的先后顺序——这是 AlexNet 不同层的先后顺序。**SDK 允许我们编程信号量和信号**，包括：
 
 - Signals*（UG_nfp6000_nfcc.pdf P46）*
-- Semaphore Library *(UG_nfp6000_nfcc.pdf )*
+- Semaphore Library *(UG_nfp6000_nfcc.pdf)*
 
 ![](files/conclusion/coresteps.jpg)
 
@@ -1067,3 +1067,17 @@ Netronome 的工程师们在 eBPF 硬件卸载编译环境、map 支持、调试
    1. <http://cvml.ist.ac.at/courses/DLWT_W17/material/AlexNet.pdf>
    2. <http://vision.stanford.edu/teaching/cs231b_spring1415/slides/alexnet_tugce_kyunghee.pdf>
 7. 全连接层：<https://zhuanlan.zhihu.com/p/33841176>
+
+<!-- Mathjax Support （网页数学公式支持）-->
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        inlineMath: [['$','$']]
+      }
+    });
+</script>
+<script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>

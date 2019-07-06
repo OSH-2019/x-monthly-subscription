@@ -1,9 +1,9 @@
 # 结题报告
+{:.no_toc}
 
 **Monthly Subscription Group**
 
-- 
-
+* TOC 
 {:toc}
 
 # 项目介绍
@@ -497,7 +497,7 @@ $$
 
 ![](files/alexnet/神经网络原理神经元.jpg)
 
-## 卷积神经网络与 Alex net
+## 卷积神经网络与 AlexNet
 
 通过仿照与抽象生物的视知觉 (visual perceptual) 结构，研究者们提出了卷积神经网络 (CNN, Convolutional Neural Network)，它是一种包含卷积运算的深度前馈神经网络。其结构上的独特设计使得它在信息提取与优化计算性能上优势明显，被广泛应用于图像处理等领域。
 
@@ -1080,6 +1080,4 @@ Netronome 的工程师们在 eBPF 硬件卸载编译环境、map 支持、调试
       }
     });
 </script>
-<script type="text/javascript" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.min.js">
-</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>

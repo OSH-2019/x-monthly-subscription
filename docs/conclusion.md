@@ -506,7 +506,7 @@ $$
 
 通过仿照与抽象生物的视知觉 (visual perceptual) 结构，研究者们提出了卷积神经网络 (CNN, Convolutional Neural Network)，它是一种包含卷积运算的深度前馈神经网络。其结构上的独特设计使得它在信息提取与优化计算性能上优势明显，被广泛应用于图像处理等领域。
 
-AlexNet 属于深层卷积神经网络， 2015年在 ImageNet 图像识别挑战赛中大放异彩，点燃了研究者们对于深度神经网络算法的热情，在人工智能的发展历程上具有里程碑意义。
+AlexNet 属于深层卷积神经网络， 2015 年在 ImageNet 图像识别挑战赛中大放异彩，点燃了研究者们对于深度神经网络算法的热情，在人工智能的发展历程上具有里程碑意义。
 
 区别于此前的神经网络架构，AlexNet 有如下特性：
 
@@ -944,7 +944,7 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 整个网络的数据包含两个主要部分：权重、偏置等参数（大型矩阵）以及当前正在计算的中间结果、梯度（向量）。前者需要更多的存储空间（MB 级别），并且在每次反向传播完成后才会修改。因此，将权重、偏置等参数存放在外部的 Adaptive Memory 中，而当前正在计算的数据记录在寄存器中。
 
-官方文档 (“Microcode Standard Library Reference Manual”) 提供有 `buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()`......（见文档 2.24）。此外还提供了实现队列的一系列函数。
+官方文档 (“Microcode Standard Library Reference Manual”) 提供有 `buf_alloc()` 和 `buf_free()` 函数，可以在程序内分配和释放 S/DRAM 的存储空间。以及控制 sram 读写的以及直接对存储内容增减的函数，包括 `sram_read()` 、`sram_write`、 `sram_bits_clr()` 、`sram_bits_set()`、 `sram_add()` 等（见文档 2.24）。此外还提供了实现队列的一系列函数。
 
 #### 核心之间数据的共享和同步
 
@@ -958,7 +958,7 @@ Local Memory 是每个 NFP 所私有的，大小为 1024 longwords。
 
 使用的通信技术包括 Next Neighbor Register，以及一种名叫 Reflector 的运算 (UG_nfp6000_nfcc.pdf, P46)
 
-进一步分析简化设计中的特点，$(w_{11}^{1}, w^1\_{21}, b11)$ 这三个参数可以存储在核心 A（$L\_{11}$ 节点）的 GPR 中，因为这三个参数并未被其他节点所使用。
+进一步分析简化设计中的特点，$(w_{11}^{1}, w^1\_{21}, b\_{11})$ 这三个参数可以存储在核心 A（$L\_{11}$ 节点）的 GPR 中，因为这三个参数并未被其他节点所使用。
 
 但我们依旧需要控制各个核心计算的先后顺序——这是 AlexNet 不同层的先后顺序。**SDK 允许我们编程信号量和信号**，包括：
 
@@ -990,6 +990,7 @@ unsigned int multiply_32x32_hi(unsigned int x, unsigned int y)
 ```
 
 例：
+
 $$
 y_1=w_1\times x_1+b_1\\
 y_2=\textrm{ReLU}(y_1)

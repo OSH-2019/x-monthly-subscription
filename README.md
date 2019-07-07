@@ -17,8 +17,9 @@ Our group members:
 
 中期报告: [Slide](docs/midterm.pptx) | [讲稿](docs/midterm.md)
 
-结题报告: [Markdown Version](docs/conclusion.md) | [PDF Version](docs/conclusion.pdf) | Slide | 讲稿
+结题报告: [Markdown Version](docs/conclusion.md) | [PDF Version](docs/conclusion.pdf) | [Slide](docs/conclusion.pptx)
 
 ## Discussion
 
 讨论记录见 [Discussion](discussion/)
+
